@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import SessionContext from "../context/SessionContext";
 import useXMPP from "./useXMPP";
-import consts from "../utils/consts";
 
 function useSession() {
 	const { session, setSession } = useContext(SessionContext);
@@ -16,7 +15,7 @@ function useSession() {
 	 */
 	const login = async ({ user, password, callback }) => {
 		const session = { user, password };
-		connect(`${user}@${consts.serverDomain}`, password, (resStatus) => {
+		connect(user, password, (resStatus) => {
 
 			if (resStatus === status.CONNECTED) {
 				window.localStorage.setItem("session", JSON.stringify(session));
@@ -40,7 +39,7 @@ function useSession() {
 
 	useEffect(() => {
 
-		if(!connection) return;
+		if(!connection || session) return;
 		// Intentar cargar la sesión desde localStorage
 		const ses = window.localStorage.getItem("session");
 		if(!ses){
@@ -49,9 +48,9 @@ function useSession() {
 			return;
 		}
 
-		const session = JSON.parse(ses);
+		const sessionData = JSON.parse(ses);
 
-		login({ user: session.user, password: session.password, callback: (success) => {
+		login({ user: sessionData.user, password: sessionData.password, callback: (success) => {
 			if (!success) {
 				window.localStorage.removeItem("session");
 				setSession(null);
