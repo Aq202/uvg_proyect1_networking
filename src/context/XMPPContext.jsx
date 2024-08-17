@@ -15,14 +15,10 @@ export const XMPPProvider = ({ children }) => {
 
         return () => conn.disconnect();
     }, []);
-
-    const disconnect = () => {
-        connection.disconnect();
-    }
-
+    
 
     return (
-        <XMPPContext.Provider value={{ connection, disconnect }}>
+        <XMPPContext.Provider value={connection}>
             {children}
         </XMPPContext.Provider>
     );

@@ -1,12 +1,11 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import SessionContext from "../context/SessionContext";
 import useXMPP from "./useXMPP";
 import consts from "../utils/consts";
-import { Strophe, $pres } from "strophe.js";
 
 function useSession() {
 	const { setSession } = useContext(SessionContext);
-	const { connection, disconnect } = useXMPP();
+	const { connection, status, connect, disconnect } = useXMPP();
 
 	/**
 	 *
@@ -17,17 +16,16 @@ function useSession() {
 	 */
 	const login = async ({ user, password, callback }) => {
 		const session = { user, password };
-		connection.connect(`${user}@${consts.serverDomain}`, password, (status) => {
-			if (status === Strophe.Status.CONNECTED) {
-				connection.send($pres().tree()); // Enviar presencia al servidor
+		connect(`${user}@${consts.serverDomain}`, password, (resStatus) => {
 
+			if (resStatus === status.CONNECTED) {
 				window.localStorage.setItem("session", JSON.stringify(session));
 				setSession(session);
 			}
 
       // Enviar status en callback
-      if (callback) {
-        callback(status === Strophe.Status.CONNECTED);
+      if (callback	&& (resStatus === status.CONNECTED || resStatus === status.AUTHFAIL)) {
+        callback(resStatus === status.CONNECTED );
       }
 		});
 	};
@@ -39,6 +37,23 @@ function useSession() {
     // Cerrar la conexión
 		disconnect();
 	};
+
+	useEffect(() => {
+
+		if(!connection) return;
+		// Intentar cargar la sesión desde localStorage
+		const ses = window.localStorage.getItem("session");
+		if(!ses) return;
+		const session = JSON.parse(ses);
+		login({ user: session.user, password: session.password, callback: (success) => {
+			if (!success) {
+				window.localStorage.removeItem("session");
+				setSession(null);
+			}
+		}  });
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [connection]);
+
 
 	return {
 		login,
