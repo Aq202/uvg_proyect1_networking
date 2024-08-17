@@ -8,15 +8,22 @@ const XMPPContext = createContext();
 
 export const XMPPProvider = ({ children }) => {
     const [connection, setConnection] = useState(null);
+	const [subscriptionRequests, setSubscriptionRequests] = useState([]); 
+
 
     useEffect(() => {
         const conn = new Strophe.Connection(`ws://${consts.serverDomain}:${consts.serverPort}/ws`);
         setConnection(conn);
     }, []);
     
+    const data = {
+        connection,
+        subscriptionRequests,
+        setSubscriptionRequests,
+    }
 
     return (
-        <XMPPContext.Provider value={connection}>
+        <XMPPContext.Provider value={data}>
             {children}
         </XMPPContext.Provider>
     );
