@@ -12,8 +12,6 @@ export const XMPPProvider = ({ children }) => {
     useEffect(() => {
         const conn = new Strophe.Connection(`ws://${consts.serverDomain}:${consts.serverPort}/ws`);
         setConnection(conn);
-
-        return () => conn.disconnect();
     }, []);
     
 

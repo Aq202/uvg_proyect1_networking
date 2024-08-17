@@ -4,7 +4,7 @@ import useXMPP from "./useXMPP";
 import consts from "../utils/consts";
 
 function useSession() {
-	const { setSession } = useContext(SessionContext);
+	const { session, setSession } = useContext(SessionContext);
 	const { connection, status, connect, disconnect } = useXMPP();
 
 	/**
@@ -43,8 +43,14 @@ function useSession() {
 		if(!connection) return;
 		// Intentar cargar la sesión desde localStorage
 		const ses = window.localStorage.getItem("session");
-		if(!ses) return;
+		if(!ses){
+			// Si no hay sesión guardada, colocar objeto como null (no hay sesión)
+			setSession(null);
+			return;
+		}
+
 		const session = JSON.parse(ses);
+
 		login({ user: session.user, password: session.password, callback: (success) => {
 			if (!success) {
 				window.localStorage.removeItem("session");
@@ -54,8 +60,8 @@ function useSession() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [connection]);
 
-
 	return {
+		session,
 		login,
 		logout,
 	};
