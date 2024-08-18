@@ -6,7 +6,15 @@ import styles from './ChatPage.module.css';
 function ChatPage() {
 
 	const { logout, session } = useSession();
-  const { sendMessage, getRoster, addContact, acceptSubscription, subscriptionRequests } = useXMPP();
+  const {
+		sendMessage,
+		getRoster,
+		addContact,
+		acceptSubscription,
+		subscriptionRequests,
+		changeState,
+		presenceShowValues,
+	} = useXMPP();
 
   const sendMessageHandler = () => {
     const to = prompt("Para");
@@ -41,6 +49,15 @@ function ChatPage() {
           </div>
         ))
       }
+
+      <h3>Modificar estado</h3>
+      <select onChange={(e) => changeState(e.target.value, prompt("Estado"))}>
+        {
+          Object.values(presenceShowValues).map((value, i) => (
+            <option key={i} value={value}>{value}</option>
+          ))
+        }
+        </select>
     </div>
   );
 }

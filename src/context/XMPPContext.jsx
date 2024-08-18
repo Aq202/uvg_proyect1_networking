@@ -7,8 +7,10 @@ import consts from '../utils/consts';
 const XMPPContext = createContext();
 
 export const XMPPProvider = ({ children }) => {
+
     const [connection, setConnection] = useState(null);
 	const [subscriptionRequests, setSubscriptionRequests] = useState([]); 
+    const [userStates, setUserStates] = useState({});
 
 
     useEffect(() => {
@@ -20,6 +22,8 @@ export const XMPPProvider = ({ children }) => {
         connection,
         subscriptionRequests,
         setSubscriptionRequests,
+        userStates,
+        setUserStates,
     }
 
     return (

@@ -5,7 +5,7 @@ import consts from "../utils/consts";
 
 const useXMPP = () => {
 
-	const {connection,subscriptionRequests, setSubscriptionRequests } = useContext(XMPPContext);
+	const { connection, subscriptionRequests, setSubscriptionRequests, setUserStates } = useContext(XMPPContext);
 
 
 	const status = {
@@ -20,11 +20,11 @@ const useXMPP = () => {
 		REDIRECT: Strophe.Status.REDIRECT,
 	};
 
-	const sendPresence = () => {
-		const presence = $pres({
-			type: "available",
-		});
-		connection.send(presence);
+	const presenceShowValues = {
+		AVAILABLE: "chat",
+		AWAY: "away",
+		DND: "dnd",
+		XA: "xa",
 	};
 
 	const onMessage = (msg) => {
@@ -44,7 +44,9 @@ const useXMPP = () => {
 				if (resStatus === status.CONNECTED) {
 					connection.addHandler(onMessage, null, "message", "chat", null); // Escuchar mensajes
 					connection.addHandler(handleSubscriptionRequest, null, "presence", "subscribe"); // Escuchar solicitudes de suscripción
-					sendPresence();
+					connection.addHandler(onPresence, null, 'presence'); // Escuchar presencia
+					
+					connection.send($pres({})); // Enviar presence con status 'disponible'
 				}
 
 				if (callback) callback(resStatus);
@@ -53,6 +55,9 @@ const useXMPP = () => {
 	};
 
 	const disconnect = () => {
+		//Enviar presence de status de desconexión
+		connection.send($pres({ type: 'unavailable' }));
+		
 		connection.disconnect();
 
 		// Limpiar variables
@@ -145,18 +150,47 @@ const useXMPP = () => {
 		return true; // Continúa escuchando otros mensajes
 	}
 
+	const onPresence = (presence) => {
+    const from = presence.getAttribute('from');
+    const type = presence.getAttribute('type');
+
+		const user = from.split('@')[0]; // Obtener solo el nombre de usuario
+		const userStatus = {};
+
+		userStatus.available = type !== 'unavailable';
+
+		if(userStatus.available){
+			userStatus.show = Strophe.getText(presence.getElementsByTagName('show')[0]);
+      userStatus.status = Strophe.getText(presence.getElementsByTagName('status')[0]);
+		}
+
+		// Guardar datos del estado del usuario
+		setUserStates((prev) => ({ ...prev, [user]: userStatus }));
+
+    return true;
+	}
+
+	const changeState = (show, status) => {
+		console.log("Cambiar estado a", show, status);
+		connection.send($pres()
+    .c('show').t(show)
+    .up()
+    .c('status').t(status)
+		);
+	}
 
 	return {
 		status,
 		connection,
 		subscriptionRequests,
+		presenceShowValues,
 		connect,
 		disconnect,
-		sendPresence,
 		sendMessage,
 		getRoster,
 		addContact,
 		acceptSubscription,
+		changeState,
 	};
 };
 
