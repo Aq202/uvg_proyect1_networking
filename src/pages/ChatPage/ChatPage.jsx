@@ -14,6 +14,7 @@ function ChatPage() {
 		subscriptionRequests,
 		changeState,
 		presenceShowValues,
+    deleteAccount,
 	} = useXMPP();
 
   const sendMessageHandler = () => {
@@ -28,6 +29,13 @@ function ChatPage() {
     addContact(contact, alias);
   }
 
+  const handleDeleteAccount = () => {
+    deleteAccount().then(() => {
+      alert("Cuenta eliminada");
+      logout();
+    });
+  }
+
   return (
     <div className={styles.ChatPage}>
       <h1>Chat de {session.user}</h1>
@@ -36,6 +44,7 @@ function ChatPage() {
       <button onClick={sendMessageHandler}>Enviar mensaje</button>
       <button onClick={getRoster}>Obtener contactos</button>
       <button onClick={addContactHandler}>Añadir contacto</button>
+      <button onClick={handleDeleteAccount}>Eliminar cuenta</button>
 
       <br />
       <h3>Solicitudes de amistad</h3>

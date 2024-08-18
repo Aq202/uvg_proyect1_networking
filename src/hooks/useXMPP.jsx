@@ -171,13 +171,20 @@ const useXMPP = () => {
 	}
 
 	const changeState = (show, status) => {
-		console.log("Cambiar estado a", show, status);
 		connection.send($pres()
     .c('show').t(show)
     .up()
     .c('status').t(status)
 		);
 	}
+
+	const deleteAccount = () => new Promise((resolve, reject) => {
+		const iq = $iq({ type: "set", to: connection.domain })
+			.c("query", { xmlns: "jabber:iq:register" })
+			.c("remove");
+
+		connection.sendIQ(iq, resolve, reject);
+	});
 
 	return {
 		status,
@@ -191,6 +198,7 @@ const useXMPP = () => {
 		addContact,
 		acceptSubscription,
 		changeState,
+		deleteAccount,
 	};
 };
 
