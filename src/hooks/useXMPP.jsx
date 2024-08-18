@@ -54,6 +54,9 @@ const useXMPP = () => {
 
 	const disconnect = () => {
 		connection.disconnect();
+
+		// Limpiar variables
+		setSubscriptionRequests([]);
 	};
 
 	const sendMessage = (to, message) => {
