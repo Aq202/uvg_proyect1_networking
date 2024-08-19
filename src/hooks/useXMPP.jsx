@@ -5,7 +5,13 @@ import consts from "../utils/consts";
 
 const useXMPP = () => {
 
-	const { connection, subscriptionRequests, setSubscriptionRequests, setUserStates } = useContext(XMPPContext);
+	const {
+		connection,
+		subscriptionRequests,
+		setSubscriptionRequests,
+		setUserStates,
+		setRooms,
+	} = useContext(XMPPContext);
 
 
 	const status = {
@@ -156,22 +162,71 @@ const useXMPP = () => {
 		return true; // Continúa escuchando otros mensajes
 	}
 
-	const onPresence = (presence) => {
-    const from = presence.getAttribute('from');
+	const handleStatusPresence = (presence) => {
+		const from = presence.getAttribute('from');
     const type = presence.getAttribute('type');
 
-		const user = from.split('@')[0]; // Obtener solo el nombre de usuario
-		const userStatus = {};
+		// Es una presencia estándar de un usuario
+		const user = from.split('@')[0];
+		const userStatus = {
+				available: type !== 'unavailable',
+		};
 
-		userStatus.available = type !== 'unavailable';
-
-		if(userStatus.available){
-			userStatus.show = Strophe.getText(presence.getElementsByTagName('show')[0]);
-      userStatus.status = Strophe.getText(presence.getElementsByTagName('status')[0]);
+		if (userStatus.available) {
+				userStatus.show = Strophe.getText(presence.getElementsByTagName('show')[0]);
+				userStatus.status = Strophe.getText(presence.getElementsByTagName('status')[0]);
 		}
 
 		// Guardar datos del estado del usuario
 		setUserStates((prev) => ({ ...prev, [user]: userStatus }));
+	}
+
+	const handleRoomPresence = (presence) => {
+		const from = presence.getAttribute('from');
+    const type = presence.getAttribute('type');
+
+		const roomJid = Strophe.getBareJidFromJid(from);
+		const room = roomJid.split('@')[0];
+
+        const nickname = Strophe.getResourceFromJid(from);
+        console.log(`Presencia de sala de chat recibida desde la sala: ${roomJid}, usuario: ${nickname}`, type);
+        
+        // Aquí puedes manejar el status específico de los usuarios en la sala
+        const roomUserStatus = {
+            available: type !== 'unavailable',
+            nickname,
+        };
+
+        setRooms((prev) => {
+						const newRooms = { ...prev };
+
+						if (!newRooms[room]) {
+							// Si la sala no existe, crearla
+							newRooms[room] = {
+								users: {[nickname]: roomUserStatus},
+								messages: [],
+							};
+						}else if (!newRooms[room][nickname]) {
+							// Si el usuario no existe en la sala, agregarlo
+							newRooms[room].users[nickname] = roomUserStatus;
+						}else{
+							// Si el usuario existe, actualizar su estado
+							newRooms[room].users[nickname] = roomUserStatus;
+						}
+
+						return newRooms;
+				});
+	}
+
+	const onPresence = (presence) => {
+    const from = presence.getAttribute('from');
+
+    // Diferenciar entre presencias de usuarios y de salas de chat
+    if (from.includes("conference")) {
+        handleRoomPresence(presence);
+    } else {
+        handleStatusPresence(presence);
+    }
 
     return true;
 	}
@@ -223,6 +278,9 @@ const useXMPP = () => {
 			
 			if (!type || type === 'available') {
 
+				// Se ha unido a la sala
+
+				// Verificar si es moderador para configurar la sala
 				const x = presence.getElementsByTagName("x")?.[0];
 				const item = x?.getElementsByTagName("item")?.[0];
 				const role = item?.getAttribute('role');
@@ -237,6 +295,28 @@ const useXMPP = () => {
 			}
 
 			return false; // Matar el manejador
+		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
+
+		connection.addHandler((presence) => {
+			const from = presence.getAttribute('from');
+			const type = presence.getAttribute('type');
+			const role = presence.getElementsByTagName('item')[0]?.getAttribute('role');
+			const affiliation = presence.getElementsByTagName('item')[0]?.getAttribute('affiliation');
+	
+			if (!type) {
+				// Unirse a la sala o cambiar el estado
+				const nickname = from.split('/')[1];
+				console.log(`${nickname} se ha unido a la sala ${roomName} con el rol ${role} y la afiliación ${affiliation}`);
+			} else if (type === 'unavailable') {
+				// Abandonar la sala
+				const nickname = from.split('/')[1];
+				console.log(`${nickname} ha abandonado la sala ${roomName}`);
+			} else {
+				// Otros tipos de presencias (como errores)
+				console.log(`Presencia recibida de tipo: ${type}`);
+			}
+	
+			return true; // Mantener el handler activo
 		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
 		
 	});
