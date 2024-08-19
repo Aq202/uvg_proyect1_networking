@@ -45,7 +45,13 @@ const useXMPP = () => {
 					connection.addHandler(onMessage, null, "message", "chat", null); // Escuchar mensajes
 					connection.addHandler(handleSubscriptionRequest, null, "presence", "subscribe"); // Escuchar solicitudes de suscripción
 					connection.addHandler(onPresence, null, 'presence'); // Escuchar presencia
+					connection.addHandler(onRoomMessage, null, 'message', 'groupchat'); // Escuchar mensajes de salas de chat
 					
+					connection.addHandler((stanza) => {
+						console.error("Error recibido:", Strophe.serialize(stanza));
+						return true; // Mantener el manejador activo
+					}, null, 'message', 'error');
+
 					connection.send($pres({})); // Enviar presence con status 'disponible'
 				}
 
@@ -185,6 +191,85 @@ const useXMPP = () => {
 
 		connection.sendIQ(iq, resolve, reject);
 	});
+	
+
+	const configureRoom = (roomName) => {
+		const iq = $iq({
+			to: `${roomName}@conference.${consts.serverDomain}`,
+			type: "set",
+	}).c("query", { xmlns: "http://jabber.org/protocol/muc#owner" })
+		.c("x", { xmlns: "jabber:x:data", type: "submit" })
+		.c("field", { var: "FORM_TYPE", type: "hidden" })
+		.c("value").t("http://jabber.org/protocol/muc#roomconfig");
+
+	iq.c("field", { var: "muc#room_persistent", type: "boolean" })
+		.c("value").t("1"); // Hacer la sala persistente
+
+    connection.sendIQ(iq, null, null);
+	};
+
+	const joinRoom = (roomName, nick) => new Promise((resolve, reject) => {
+		
+		const presence = $pres({
+			from: connection.jid,
+			to: `${roomName}@conference.${consts.serverDomain}/${nick}`,
+		}).c("x", { xmlns: "http://jabber.org/protocol/muc" });
+
+		connection.send(presence);
+
+		// Escuchar la respuesta al intentar unirse a la sala
+		connection.addHandler((presence) => {
+			const type = presence.getAttribute('type');
+			
+			if (!type || type === 'available') {
+
+				const x = presence.getElementsByTagName("x")?.[0];
+				const item = x?.getElementsByTagName("item")?.[0];
+				const role = item?.getAttribute('role');
+				if (role === 'moderator') {
+					// Si es moderador, configurar la sala
+					configureRoom(roomName);
+				}
+
+				resolve();
+			} else if (type === 'error') {
+				reject(presence);
+			}
+
+			return false; // Matar el manejador
+		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
+		
+	});
+
+	const sendRoomMessage = (roomName, message) => {
+		const msg = $msg({
+			to: `${roomName}@conference.${consts.serverDomain}`,
+			type: "groupchat",
+		})
+			.c("body")
+			.t(message);
+
+		connection.send(msg);
+	};
+
+	const onRoomMessage = (msg) => {
+		const from = msg.getAttribute('from'); // ID completo del remitente
+    const roomJid = Strophe.getBareJidFromJid(from); // Obtener solo el JID de la sala
+    const body = msg.getElementsByTagName('body')[0];
+
+    if (body) {
+			const messageText = Strophe.getText(body);
+
+			// Extraer el nickname del remitente
+			const fromParts = from.split('/');
+			const nickname = fromParts.length > 1 ? fromParts[1] : fromParts[0];
+        console.log(`Mensaje de la sala ${roomJid}: ${nickname} - ${messageText}`);
+    }
+
+    return true; // Mantener el manejador activo
+	};
+
+	
 
 	return {
 		status,
@@ -199,6 +284,8 @@ const useXMPP = () => {
 		acceptSubscription,
 		changeState,
 		deleteAccount,
+		joinRoom,
+		sendRoomMessage,
 	};
 };
 

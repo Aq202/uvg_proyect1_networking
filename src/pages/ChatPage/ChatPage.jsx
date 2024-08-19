@@ -15,6 +15,8 @@ function ChatPage() {
 		changeState,
 		presenceShowValues,
     deleteAccount,
+    joinRoom,
+    sendRoomMessage,
 	} = useXMPP();
 
   const sendMessageHandler = () => {
@@ -36,6 +38,20 @@ function ChatPage() {
     });
   }
 
+  const handleJoinRoom = () => {
+    const roomName = prompt("Nombre de la sala");
+    const nick = prompt("Nickname");
+    joinRoom(roomName, nick).then(()=>{
+      alert("Te haz unido a la sala.");
+    })
+  }
+
+  const handleSendRoomMessage = () => {
+    const roomName = prompt("Nombre de la sala");
+    const message = prompt("Mensaje");
+    sendRoomMessage(roomName, message);
+  }
+
   return (
     <div className={styles.ChatPage}>
       <h1>Chat de {session.user}</h1>
@@ -45,6 +61,8 @@ function ChatPage() {
       <button onClick={getRoster}>Obtener contactos</button>
       <button onClick={addContactHandler}>Añadir contacto</button>
       <button onClick={handleDeleteAccount}>Eliminar cuenta</button>
+      <button onClick={handleJoinRoom}>Unirse a sala</button>
+      <button onClick={handleSendRoomMessage}>Enviar mensaje a sala</button>
 
       <br />
       <h3>Solicitudes de amistad</h3>
