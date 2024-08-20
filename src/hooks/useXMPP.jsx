@@ -11,6 +11,7 @@ const useXMPP = () => {
 		setSubscriptionRequests,
 		setUserStates,
 		setRooms,
+		setMessages,
 	} = useContext(XMPPContext);
 
 
@@ -37,7 +38,14 @@ const useXMPP = () => {
 		const from = msg.getAttribute("from");
 		const body = msg.getElementsByTagName("body")[0].textContent;
 
-		console.log("Mensaje recibido de " + from + ": " + body);
+		const user = from.split("@")[0];
+		const message = { user, message:body, date: new Date() };
+
+		if(!body[user]){
+			setMessages((prev) => ({ ...prev, [user]: [message] }));
+		}else{
+			setMessages((prev) => ({ ...prev, [user]: [...prev[user], message] }));
+		}
 
 		return true; // Mantener el handler activo
 	};
