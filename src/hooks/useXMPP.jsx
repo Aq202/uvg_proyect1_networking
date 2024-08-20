@@ -189,7 +189,7 @@ const useXMPP = () => {
 		const room = roomJid.split('@')[0];
 
         const nickname = Strophe.getResourceFromJid(from);
-        console.log(`Presencia de sala de chat recibida desde la sala: ${roomJid}, usuario: ${nickname}`, type);
+
         
         // Aquí puedes manejar el status específico de los usuarios en la sala
         const roomUserStatus = {
@@ -198,6 +198,7 @@ const useXMPP = () => {
         };
 
         setRooms((prev) => {
+					
 						const newRooms = { ...prev };
 
 						if (!newRooms[room]) {
@@ -297,28 +298,6 @@ const useXMPP = () => {
 			return false; // Matar el manejador
 		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
 
-		connection.addHandler((presence) => {
-			const from = presence.getAttribute('from');
-			const type = presence.getAttribute('type');
-			const role = presence.getElementsByTagName('item')[0]?.getAttribute('role');
-			const affiliation = presence.getElementsByTagName('item')[0]?.getAttribute('affiliation');
-	
-			if (!type) {
-				// Unirse a la sala o cambiar el estado
-				const nickname = from.split('/')[1];
-				console.log(`${nickname} se ha unido a la sala ${roomName} con el rol ${role} y la afiliación ${affiliation}`);
-			} else if (type === 'unavailable') {
-				// Abandonar la sala
-				const nickname = from.split('/')[1];
-				console.log(`${nickname} ha abandonado la sala ${roomName}`);
-			} else {
-				// Otros tipos de presencias (como errores)
-				console.log(`Presencia recibida de tipo: ${type}`);
-			}
-	
-			return true; // Mantener el handler activo
-		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
-		
 	});
 
 	const sendRoomMessage = (roomName, message) => {
@@ -333,20 +312,39 @@ const useXMPP = () => {
 	};
 
 	const onRoomMessage = (msg) => {
-		const from = msg.getAttribute('from'); // ID completo del remitente
-    const roomJid = Strophe.getBareJidFromJid(from); // Obtener solo el JID de la sala
-    const body = msg.getElementsByTagName('body')[0];
+		const from = msg.getAttribute("from");
+		const roomJid = Strophe.getBareJidFromJid(from);
+		const room = roomJid.split("@")[0];
 
-    if (body) {
+		const body = msg.getElementsByTagName("body")[0];
+
+		if (body) {
 			const messageText = Strophe.getText(body);
 
 			// Extraer el nickname del remitente
-			const fromParts = from.split('/');
+			const fromParts = from.split("/");
 			const nickname = fromParts.length > 1 ? fromParts[1] : fromParts[0];
-        console.log(`Mensaje de la sala ${roomJid}: ${nickname} - ${messageText}`);
-    }
+			
+			// Guardar el mensaje en el estado
+			setRooms((prev) => {
+				const newRooms = { ...prev };
 
-    return true; // Mantener el manejador activo
+				if (!newRooms[room]) {
+					// Si la sala no existe, crearla
+					newRooms[room] = {
+						users: {},
+						messages: [{ nickname, message: messageText }],
+					};
+				} else {
+					// Si la sala existe, agregar el mensaje
+					newRooms[room].messages.push({ nickname, message: messageText });
+				}
+
+				return newRooms;
+			});
+		}
+
+		return true; // Mantener el manejador activo
 	};
 
 	
