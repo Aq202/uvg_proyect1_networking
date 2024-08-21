@@ -1,4 +1,5 @@
 // import PropTypes from 'prop-types';
+import { useState } from 'react';
 import useSession from '../../hooks/useSession';
 import useXMPP from '../../hooks/useXMPP';
 import styles from './ChatPage.module.css';
@@ -6,6 +7,10 @@ import styles from './ChatPage.module.css';
 function ChatPage() {
 
 	const { logout, session } = useSession();
+
+  const [file, setFile] = useState(null);
+
+
   const {
 		sendMessage,
 		getRoster,
@@ -17,6 +22,8 @@ function ChatPage() {
     deleteAccount,
     joinRoom,
     sendRoomMessage,
+    getContactDetails,
+    getUploadUrl,
 	} = useXMPP();
 
   const sendMessageHandler = () => {
@@ -52,6 +59,44 @@ function ChatPage() {
     sendRoomMessage(roomName, message);
   }
 
+  const handleGetUserData = () => {
+    getContactDetails(prompt("Usuario")).then((data) => {
+      console.log(data);
+    });
+  }
+
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleSendFile = () => {
+		if (file) {
+			getUploadUrl({ filename: file.name, size: file.size, contentType: file.type }).then((url) => {
+				fetch(url, {
+					method: "PUT",
+					body: file,
+				}).then(() => {
+					alert("Archivo Subido");
+					console.log("Archivo Subido a: ", url);
+				});
+			});
+		}
+	};
+
+  const handleDownloadFile = () => {
+    const url = prompt("URL del archivo");
+    fetch(url).then((response) => {
+      response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "file";
+        a.click();
+      });
+    });
+  }
+
   return (
     <div className={styles.ChatPage}>
       <h1>Chat de {session.user}</h1>
@@ -63,7 +108,8 @@ function ChatPage() {
       <button onClick={handleDeleteAccount}>Eliminar cuenta</button>
       <button onClick={handleJoinRoom}>Unirse a sala</button>
       <button onClick={handleSendRoomMessage}>Enviar mensaje a sala</button>
-
+      <button onClick={handleGetUserData}>Obtener datos de usuario</button>
+      <button onClick={handleDownloadFile}>Descargar archivo</button>
       <br />
       <h3>Solicitudes de amistad</h3>
       {
@@ -85,6 +131,10 @@ function ChatPage() {
           ))
         }
         </select>
+
+        <h3>Subir archivos</h3>
+        <input type="file" onChange={handleFileChange} />
+      <button onClick={handleSendFile}>Send File</button>
     </div>
   );
 }

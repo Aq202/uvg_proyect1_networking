@@ -4,7 +4,6 @@ import { Strophe, $pres, $msg, $iq } from "strophe.js";
 import consts from "../utils/consts";
 
 const useXMPP = () => {
-
 	const {
 		connection,
 		subscriptionRequests,
@@ -13,7 +12,6 @@ const useXMPP = () => {
 		setRooms,
 		setMessages,
 	} = useContext(XMPPContext);
-
 
 	const status = {
 		CONNECTING: Strophe.Status.CONNECTING,
@@ -39,11 +37,11 @@ const useXMPP = () => {
 		const body = msg.getElementsByTagName("body")[0].textContent;
 
 		const user = from.split("@")[0];
-		const message = { user, message:body, date: new Date() };
+		const message = { user, message: body, date: new Date() };
 
-		if(!body[user]){
+		if (!body[user]) {
 			setMessages((prev) => ({ ...prev, [user]: [message] }));
-		}else{
+		} else {
 			setMessages((prev) => ({ ...prev, [user]: [...prev[user], message] }));
 		}
 
@@ -58,13 +56,18 @@ const useXMPP = () => {
 				if (resStatus === status.CONNECTED) {
 					connection.addHandler(onMessage, null, "message", "chat", null); // Escuchar mensajes
 					connection.addHandler(handleSubscriptionRequest, null, "presence", "subscribe"); // Escuchar solicitudes de suscripción
-					connection.addHandler(onPresence, null, 'presence'); // Escuchar presencia
-					connection.addHandler(onRoomMessage, null, 'message', 'groupchat'); // Escuchar mensajes de salas de chat
-					
-					connection.addHandler((stanza) => {
-						console.error("Error recibido:", Strophe.serialize(stanza));
-						return true; // Mantener el manejador activo
-					}, null, 'message', 'error');
+					connection.addHandler(onPresence, null, "presence"); // Escuchar presencia
+					connection.addHandler(onRoomMessage, null, "message", "groupchat"); // Escuchar mensajes de salas de chat
+
+					connection.addHandler(
+						(stanza) => {
+							console.error("Error recibido:", Strophe.serialize(stanza));
+							return true; // Mantener el manejador activo
+						},
+						null,
+						"message",
+						"error"
+					);
 
 					connection.send($pres({})); // Enviar presence con status 'disponible'
 				}
@@ -76,8 +79,8 @@ const useXMPP = () => {
 
 	const disconnect = () => {
 		//Enviar presence de status de desconexión
-		connection.send($pres({ type: 'unavailable' }));
-		
+		connection.send($pres({ type: "unavailable" }));
+
 		connection.disconnect();
 
 		// Limpiar variables
@@ -171,142 +174,142 @@ const useXMPP = () => {
 	}
 
 	const handleStatusPresence = (presence) => {
-		const from = presence.getAttribute('from');
-    const type = presence.getAttribute('type');
+		const from = presence.getAttribute("from");
+		const type = presence.getAttribute("type");
 
 		// Es una presencia estándar de un usuario
-		const user = from.split('@')[0];
+		const user = from.split("@")[0];
 		const userStatus = {
-				available: type !== 'unavailable',
+			available: type !== "unavailable",
 		};
 
 		if (userStatus.available) {
-				userStatus.show = Strophe.getText(presence.getElementsByTagName('show')[0]);
-				userStatus.status = Strophe.getText(presence.getElementsByTagName('status')[0]);
+			userStatus.show = Strophe.getText(presence.getElementsByTagName("show")[0]);
+			userStatus.status = Strophe.getText(presence.getElementsByTagName("status")[0]);
 		}
 
 		// Guardar datos del estado del usuario
 		setUserStates((prev) => ({ ...prev, [user]: userStatus }));
-	}
+	};
 
 	const handleRoomPresence = (presence) => {
-		const from = presence.getAttribute('from');
-    const type = presence.getAttribute('type');
+		const from = presence.getAttribute("from");
+		const type = presence.getAttribute("type");
 
 		const roomJid = Strophe.getBareJidFromJid(from);
-		const room = roomJid.split('@')[0];
+		const room = roomJid.split("@")[0];
 
-        const nickname = Strophe.getResourceFromJid(from);
+		const nickname = Strophe.getResourceFromJid(from);
 
-        
-        // Aquí puedes manejar el status específico de los usuarios en la sala
-        const roomUserStatus = {
-            available: type !== 'unavailable',
-            nickname,
-        };
+		// Aquí puedes manejar el status específico de los usuarios en la sala
+		const roomUserStatus = {
+			available: type !== "unavailable",
+			nickname,
+		};
 
-        setRooms((prev) => {
-					
-						const newRooms = { ...prev };
+		setRooms((prev) => {
+			const newRooms = { ...prev };
 
-						if (!newRooms[room]) {
-							// Si la sala no existe, crearla
-							newRooms[room] = {
-								users: {[nickname]: roomUserStatus},
-								messages: [],
-							};
-						}else if (!newRooms[room][nickname]) {
-							// Si el usuario no existe en la sala, agregarlo
-							newRooms[room].users[nickname] = roomUserStatus;
-						}else{
-							// Si el usuario existe, actualizar su estado
-							newRooms[room].users[nickname] = roomUserStatus;
-						}
+			if (!newRooms[room]) {
+				// Si la sala no existe, crearla
+				newRooms[room] = {
+					users: { [nickname]: roomUserStatus },
+					messages: [],
+				};
+			} else if (!newRooms[room][nickname]) {
+				// Si el usuario no existe en la sala, agregarlo
+				newRooms[room].users[nickname] = roomUserStatus;
+			} else {
+				// Si el usuario existe, actualizar su estado
+				newRooms[room].users[nickname] = roomUserStatus;
+			}
 
-						return newRooms;
-				});
-	}
+			return newRooms;
+		});
+	};
 
 	const onPresence = (presence) => {
-    const from = presence.getAttribute('from');
+		const from = presence.getAttribute("from");
 
-    // Diferenciar entre presencias de usuarios y de salas de chat
-    if (from.includes("conference")) {
-        handleRoomPresence(presence);
-    } else {
-        handleStatusPresence(presence);
-    }
+		// Diferenciar entre presencias de usuarios y de salas de chat
+		if (from.includes("conference")) {
+			handleRoomPresence(presence);
+		} else {
+			handleStatusPresence(presence);
+		}
 
-    return true;
-	}
+		return true;
+	};
 
 	const changeState = (show, status) => {
-		connection.send($pres()
-    .c('show').t(show)
-    .up()
-    .c('status').t(status)
-		);
-	}
+		connection.send($pres().c("show").t(show).up().c("status").t(status));
+	};
 
-	const deleteAccount = () => new Promise((resolve, reject) => {
-		const iq = $iq({ type: "set", to: connection.domain })
-			.c("query", { xmlns: "jabber:iq:register" })
-			.c("remove");
+	const deleteAccount = () =>
+		new Promise((resolve, reject) => {
+			const iq = $iq({ type: "set", to: connection.domain })
+				.c("query", { xmlns: "jabber:iq:register" })
+				.c("remove");
 
-		connection.sendIQ(iq, resolve, reject);
-	});
-	
+			connection.sendIQ(iq, resolve, reject);
+		});
 
 	const configureRoom = (roomName) => {
 		const iq = $iq({
 			to: `${roomName}@conference.${consts.serverDomain}`,
 			type: "set",
-	}).c("query", { xmlns: "http://jabber.org/protocol/muc#owner" })
-		.c("x", { xmlns: "jabber:x:data", type: "submit" })
-		.c("field", { var: "FORM_TYPE", type: "hidden" })
-		.c("value").t("http://jabber.org/protocol/muc#roomconfig");
+		})
+			.c("query", { xmlns: "http://jabber.org/protocol/muc#owner" })
+			.c("x", { xmlns: "jabber:x:data", type: "submit" })
+			.c("field", { var: "FORM_TYPE", type: "hidden" })
+			.c("value")
+			.t("http://jabber.org/protocol/muc#roomconfig");
 
-	iq.c("field", { var: "muc#room_persistent", type: "boolean" })
-		.c("value").t("1"); // Hacer la sala persistente
+		iq.c("field", { var: "muc#room_persistent", type: "boolean" }).c("value").t("1"); // Hacer la sala persistente
 
-    connection.sendIQ(iq, null, null);
+		connection.sendIQ(iq, null, null);
 	};
 
-	const joinRoom = (roomName, nick) => new Promise((resolve, reject) => {
-		
-		const presence = $pres({
-			from: connection.jid,
-			to: `${roomName}@conference.${consts.serverDomain}/${nick}`,
-		}).c("x", { xmlns: "http://jabber.org/protocol/muc" });
+	const joinRoom = (roomName, nick) =>
+		new Promise((resolve, reject) => {
+			const presence = $pres({
+				from: connection.jid,
+				to: `${roomName}@conference.${consts.serverDomain}/${nick}`,
+			}).c("x", { xmlns: "http://jabber.org/protocol/muc" });
 
-		connection.send(presence);
+			connection.send(presence);
 
-		// Escuchar la respuesta al intentar unirse a la sala
-		connection.addHandler((presence) => {
-			const type = presence.getAttribute('type');
-			
-			if (!type || type === 'available') {
+			// Escuchar la respuesta al intentar unirse a la sala
+			connection.addHandler(
+				(presence) => {
+					const type = presence.getAttribute("type");
 
-				// Se ha unido a la sala
+					if (!type || type === "available") {
+						// Se ha unido a la sala
 
-				// Verificar si es moderador para configurar la sala
-				const x = presence.getElementsByTagName("x")?.[0];
-				const item = x?.getElementsByTagName("item")?.[0];
-				const role = item?.getAttribute('role');
-				if (role === 'moderator') {
-					// Si es moderador, configurar la sala
-					configureRoom(roomName);
-				}
+						// Verificar si es moderador para configurar la sala
+						const x = presence.getElementsByTagName("x")?.[0];
+						const item = x?.getElementsByTagName("item")?.[0];
+						const role = item?.getAttribute("role");
+						if (role === "moderator") {
+							// Si es moderador, configurar la sala
+							configureRoom(roomName);
+						}
 
-				resolve();
-			} else if (type === 'error') {
-				reject(presence);
-			}
+						resolve();
+					} else if (type === "error") {
+						reject(presence);
+					}
 
-			return false; // Matar el manejador
-		}, null, 'presence', null, null, `${roomName}@conference.${consts.serverDomain}/${nick}`);
-
-	});
+					return false; // Matar el manejador
+				},
+				null,
+				"presence",
+				null,
+				null,
+				`${roomName}@conference.${consts.serverDomain}/${nick}`
+			);
+		});
 
 	const sendRoomMessage = (roomName, message) => {
 		const msg = $msg({
@@ -332,7 +335,7 @@ const useXMPP = () => {
 			// Extraer el nickname del remitente
 			const fromParts = from.split("/");
 			const nickname = fromParts.length > 1 ? fromParts[1] : fromParts[0];
-			
+
 			// Guardar el mensaje en el estado
 			setRooms((prev) => {
 				const newRooms = { ...prev };
@@ -355,7 +358,62 @@ const useXMPP = () => {
 		return true; // Mantener el manejador activo
 	};
 
-	
+	const getContactDetails = (user) => {
+		const jid = `${user}@${consts.serverDomain}`;
+		return new Promise((resolve, reject) => {
+			const iq = $iq({
+				type: "get",
+				to: jid,
+				xmlns: "jabber:client",
+			}).c("vCard", { xmlns: "vcard-temp" });
+
+			connection.sendIQ(
+				iq,
+				(response) => {
+					const vCard = response.getElementsByTagName("vCard")[0];
+					const fullName = vCard.getElementsByTagName("FN")[0]?.textContent;
+					const nickname = vCard.getElementsByTagName("NICKNAME")[0]?.textContent;
+					const email = vCard.getElementsByTagName("EMAIL")[0]?.textContent;
+
+					const contactDetails = {
+						jid,
+						fullName,
+						nickname,
+						email,
+					};
+
+					resolve(contactDetails);
+				},
+				reject
+			);
+		});
+	};
+
+	const getUploadUrl = ({ filename, size, contentType }) =>
+		new Promise((resolve, reject) => {
+			// Solicitar URL de subida
+			const request = $iq({
+				type: "get",
+				to: `${consts.uploadFilesSubdomain}.${consts.serverDomain}`,
+			}).c("request", {
+				xmlns: "urn:xmpp:http:upload:0",
+				filename,
+				size,
+				contentType,
+			});
+
+			connection.sendIQ(
+				request,
+				(response) => {
+					const slot = response.querySelector("slot");
+					const putUrl = slot?.querySelector("put")?.getAttribute("url");
+
+					if(!putUrl) reject("No se pudo obtener la URL de subida.");
+					resolve(putUrl);
+				},
+				(error) => reject(error)
+			);
+		});
 
 	return {
 		status,
@@ -372,6 +430,8 @@ const useXMPP = () => {
 		deleteAccount,
 		joinRoom,
 		sendRoomMessage,
+		getContactDetails,
+		getUploadUrl,
 	};
 };
 
