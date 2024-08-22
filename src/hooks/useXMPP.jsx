@@ -358,37 +358,6 @@ const useXMPP = () => {
 		return true; // Mantener el manejador activo
 	};
 
-	const getContactDetails = (user) => {
-		const jid = `${user}@${consts.serverDomain}`;
-		return new Promise((resolve, reject) => {
-			const iq = $iq({
-				type: "get",
-				to: jid,
-				xmlns: "jabber:client",
-			}).c("vCard", { xmlns: "vcard-temp" });
-
-			connection.sendIQ(
-				iq,
-				(response) => {
-					const vCard = response.getElementsByTagName("vCard")[0];
-					const fullName = vCard.getElementsByTagName("FN")[0]?.textContent;
-					const nickname = vCard.getElementsByTagName("NICKNAME")[0]?.textContent;
-					const email = vCard.getElementsByTagName("EMAIL")[0]?.textContent;
-
-					const contactDetails = {
-						jid,
-						fullName,
-						nickname,
-						email,
-					};
-
-					resolve(contactDetails);
-				},
-				reject
-			);
-		});
-	};
-
 	const getUploadUrl = ({ filename, size, contentType }) =>
 		new Promise((resolve, reject) => {
 			// Solicitar URL de subida
@@ -430,7 +399,6 @@ const useXMPP = () => {
 		deleteAccount,
 		joinRoom,
 		sendRoomMessage,
-		getContactDetails,
 		getUploadUrl,
 	};
 };
