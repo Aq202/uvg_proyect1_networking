@@ -43,12 +43,12 @@ const useXMPP = () => {
 
 		const user = from.split("@")[0];
 		const message = { user, message: body, date: new Date(), viewed: false };
+		console.log("body ", body)
 
-		if (!body[user]) {
-			setMessages((prev) => ({ ...prev, [user]: [message] }));
-		} else {
-			setMessages((prev) => ({ ...prev, [user]: [...prev[user], message] }));
-		}
+		setMessages((prev) => {
+			if (!prev[user]) return { ...prev, [user]: [message] };
+			return { ...prev, [user]: [...prev[user], message] };
+		});
 
 		return true; // Mantener el handler activo
 	};
