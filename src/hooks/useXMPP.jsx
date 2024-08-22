@@ -7,10 +7,15 @@ const useXMPP = () => {
 	const {
 		connection,
 		subscriptionRequests,
+		rooms,
+		messages,
+		roster,
+		userStates,
 		setSubscriptionRequests,
 		setUserStates,
 		setRooms,
 		setMessages,
+		setRoster,
 	} = useContext(XMPPContext);
 
 	const status = {
@@ -70,6 +75,8 @@ const useXMPP = () => {
 					);
 
 					connection.send($pres({})); // Enviar presence con status 'disponible'
+
+					getRoster();
 				}
 
 				if (callback) callback(resStatus);
@@ -101,6 +108,7 @@ const useXMPP = () => {
 	};
 
 	const getRoster = () => {
+		// Solicitar roster al servidor
 		const iq = $iq({
 			type: "get",
 			xmlns: "jabber:client",
@@ -108,28 +116,28 @@ const useXMPP = () => {
 
 		connection.sendIQ(
 			iq,
-			function (response) {
-				console.log("Lista de contactos obtenida:", response);
-				handleRoster(response);
+			(response) => {
+
+				// Se obtuvieron los contactos en el roster
+				const items = response.getElementsByTagName("item");
+				const contacts = {};
+		
+				for (let i = 0; i < items.length; i++) {
+					const jid = items[i].getAttribute("jid");
+
+					const user = jid.split("@")[0];
+					const alias = items[i].getAttribute("name");
+					const subscription = items[i].getAttribute("subscription");
+
+					contacts[user] = { user, alias, subscription };
+				}
+				// Añadir a variable de estado en context
+				setRoster(contacts);
 			},
 			function (error) {
 				console.error("Error al obtener lista de contactos:", error);
 			}
 		);
-	};
-
-	const handleRoster = (response) => {
-		const items = response.getElementsByTagName("item");
-		const contacts = [];
-
-		for (let i = 0; i < items.length; i++) {
-			const jid = items[i].getAttribute("jid");
-			const name = items[i].getAttribute("name");
-			const subscription = items[i].getAttribute("subscription");
-			contacts.push({ jid, name, subscription });
-		}
-
-		console.log("Contactos:", contacts);
 	};
 
 	const addContactToRoster = (jid, name) =>
@@ -389,6 +397,10 @@ const useXMPP = () => {
 		connection,
 		subscriptionRequests,
 		presenceShowValues,
+		rooms,
+		messages,
+		roster,
+		userStates,
 		connect,
 		disconnect,
 		sendMessage,

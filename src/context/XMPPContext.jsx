@@ -13,6 +13,7 @@ export const XMPPProvider = ({ children }) => {
     const [userStates, setUserStates] = useState({});
     const [rooms, setRooms] = useState({});
     const [messages, setMessages] = useState({});
+    const [roster, setRoster] = useState({});
 
 
     useEffect(() => {
@@ -25,11 +26,13 @@ export const XMPPProvider = ({ children }) => {
         subscriptionRequests,
         rooms,
         messages,
+        roster,
+        userStates,
         setRooms,
         setSubscriptionRequests,
-        userStates,
         setUserStates,
-        setMessages
+        setMessages,
+        setRoster,
     }
 
     return (
