@@ -92,6 +92,10 @@ const useXMPP = () => {
 
 		// Limpiar variables
 		setSubscriptionRequests([]);
+		setMessages({});
+		setRooms({});
+		setRoster({});
+		setUserStates({});
 	};
 
 	const sendMessage = (to, message) => {
