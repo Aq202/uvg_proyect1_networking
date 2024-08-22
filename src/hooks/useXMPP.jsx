@@ -42,7 +42,7 @@ const useXMPP = () => {
 		const body = msg.getElementsByTagName("body")[0].textContent;
 
 		const user = from.split("@")[0];
-		const message = { user, message: body, date: new Date() };
+		const message = { user, message: body, date: new Date(), viewed: false };
 
 		if (!body[user]) {
 			setMessages((prev) => ({ ...prev, [user]: [message] }));
