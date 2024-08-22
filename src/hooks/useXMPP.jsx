@@ -392,6 +392,12 @@ const useXMPP = () => {
 			);
 		});
 
+		const createEmptyChat = (user) =>
+			setMessages((prev) => {
+				if (prev[user]) return prev;
+				return { ...prev, [user]: [] };
+			});
+
 	return {
 		status,
 		connection,
@@ -412,6 +418,7 @@ const useXMPP = () => {
 		joinRoom,
 		sendRoomMessage,
 		getUploadUrl,
+		createEmptyChat,
 	};
 };
 
