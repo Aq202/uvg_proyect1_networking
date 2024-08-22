@@ -1,0 +1,66 @@
+.chatItem{
+  padding: 10px 20px 10px 20px;
+  display: grid;
+  grid-template-columns: min-content 1fr min-content;
+  grid-template-rows: min-content min-content;
+  align-items: center;
+  cursor: pointer;
+}
+
+.chatItem:hover{
+  background-color: #ffffff11;  
+}
+
+.chatItem.selected{
+  background-color: #ffffff24;  
+}
+
+.photo{
+  grid-row: 1/-1;
+  grid-column: 1;
+  margin-right: 10px;
+}
+
+.name{
+  grid-row: 1;
+  grid-column: 2;
+  font-size: 20px;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+.date{
+  grid-row: 1;
+  grid-column: 3;
+  color: #ffffff99;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.lastMessage{
+  grid-row: 2;
+  grid-column: 2;
+  color: #ffffff99;
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.notViewed{
+  grid-row: 2;
+  grid-column: 3;
+  justify-self: end;
+  background-color: #6a89fa;
+  color: #efefef;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  margin-left: 10px;
+}

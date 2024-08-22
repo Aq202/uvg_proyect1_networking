@@ -1,0 +1,42 @@
+.userPicture {
+  height: 40px;
+  aspect-ratio: 1/1;
+  display: flex;
+  font-size: 20px;
+  text-decoration: none;
+  position: relative;
+}
+
+.userPicture .nameCircle {
+  width: 100%;
+  height: 100%;
+  background-color: orange;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 50%;
+}
+
+.nameCircle {
+  font-size: inherit;
+}
+
+.nameCircle.showStatus::after {
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.nameCircle.active::after {
+  background-color: green;
+}
+
+.nameCircle:not(.active)::after {
+  background-color: rgb(145, 145, 145);
+}

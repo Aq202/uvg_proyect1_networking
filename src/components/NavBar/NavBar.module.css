@@ -1,0 +1,41 @@
+.navBar{
+  background-color: #131313;
+  width: 80px;
+}
+
+.navBar ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  padding: 20px 0;
+  height: 100vh;
+}
+
+.navBar ul li{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px 15px;
+  cursor: pointer;
+}
+
+.navBar ul li:hover{
+  background-color: #242424;
+}
+
+.icon{
+  color: white;
+  font-size: 20px;
+  width: 100%;
+}
+
+.groupChatIcon{
+  width: 28px;
+  margin: auto;
+}
+
+.navBar li span{
+  color: white;
+  font-size: 11px;
+  text-align: center;
+}

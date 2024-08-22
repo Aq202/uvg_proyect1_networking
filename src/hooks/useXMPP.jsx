@@ -43,7 +43,6 @@ const useXMPP = () => {
 
 		const user = from.split("@")[0];
 		const message = { user, message: body, date: new Date(), viewed: false };
-		console.log("body ", body)
 
 		setMessages((prev) => {
 			if (!prev[user]) return { ...prev, [user]: [message] };

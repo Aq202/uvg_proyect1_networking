@@ -1,0 +1,5 @@
+.chatPage{
+  display: grid;
+  grid-template-columns: min-content 400px 1fr min-content;
+  background-color: #202329;
+}

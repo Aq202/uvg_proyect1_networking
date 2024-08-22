@@ -1,0 +1,17 @@
+.addButton{
+  background-color: #2e333d;
+  outline: none;
+  border: 0;
+  border-radius: 50%;
+  height: 40px;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.addButton svg{
+  color: white;
+  font-size: 15px;
+}
