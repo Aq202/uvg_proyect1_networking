@@ -127,7 +127,11 @@ const useXMPP = () => {
 
 	};
 
-	const getRoster = () => {
+	/**
+	 * Obtener los contactos en el roster
+	 * @returns Promise. Resolve(Contacts). Reject(Error)
+	 */
+	const getRoster = () => new Promise((resolve, reject) => {
 		// Solicitar roster al servidor
 		const iq = $iq({
 			type: "get",
@@ -156,13 +160,11 @@ const useXMPP = () => {
 				}
 				// Añadir a variable de estado en context
 				setRoster(contacts);
-				console.log(contacts)
+				resolve(contacts);
 			},
-			function (error) {
-				console.error("Error al obtener lista de contactos:", error);
-			}
+			reject,
 		);
-	};
+	});
 
 	const addContactToRoster = (jid, name) =>
 		new Promise((resolve, reject) => {
@@ -177,7 +179,10 @@ const useXMPP = () => {
 					subscription: "both",
 				});
 
-			connection.sendIQ(iq, resolve, reject);
+			connection.sendIQ(iq, ()=>{
+				
+				getRoster().then(resolve()); // Resolver promesa hasta actualizar roster
+			}, reject);
 		});
 
 	const addContact = (user, alias) => {
@@ -191,6 +196,7 @@ const useXMPP = () => {
 		const jid = `${user}@${consts.serverDomain}`;
 		addContactToRoster(jid, alias).then(() => {
 			connection.send($pres({ to: jid, type: "subscribed" }));
+			connection.send($pres({ to: jid, type: "subscribe" }));
 
 			// Eliminar de la lista de solicitudes
 			setSubscriptionRequests((prev) => prev.filter((userName) => user !== userName));
@@ -198,13 +204,23 @@ const useXMPP = () => {
 	};
 
 	function handleSubscriptionRequest(presence) {
-		const senderJid = Strophe.getBareJidFromJid(presence.getAttribute("from"));
-		const user = senderJid.split("@")[0];
 
-		// Agregar a la lista de solicitudes
-		setSubscriptionRequests((prev) => [...prev, user]);
+		getRoster().then(rosterResult => {
 
-		return true; // Continúa escuchando otros mensajes
+			const senderJid = Strophe.getBareJidFromJid(presence.getAttribute("from"));
+			const user = senderJid.split("@")[0];
+
+			// Si el usuario que solicita ya está dentro del roster, aceptar automáticamente
+			if (rosterResult[user]) {
+				connection.send($pres({ to: senderJid, type: "subscribed" }));
+				return true; // Continúa escuchando otros mensajes
+			}
+
+			// Agregar a la lista de solicitudes
+			setSubscriptionRequests((prev) => [...prev, user]);
+
+			return true; // Continúa escuchando otros mensajes
+	})
 	}
 
 	const handleStatusPresence = (presence) => {
