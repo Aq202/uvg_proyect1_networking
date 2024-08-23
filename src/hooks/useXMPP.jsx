@@ -42,11 +42,19 @@ const useXMPP = () => {
 		const body = msg.getElementsByTagName("body")[0].textContent;
 
 		const user = from.split("@")[0];
-		const message = { user, message: body, date: new Date(), viewed: false };
+		const message = { user, message: body, date: new Date(), viewed: false, sent: false };
 
 		setMessages((prev) => {
-			if (!prev[user]) return { ...prev, [user]: [message] };
-			return { ...prev, [user]: [...prev[user], message] };
+			if(!prev[user] && body === "") return prev; // No hay mensajes previos y es un mensaje de confirmación de visto
+			if (!prev[user]) return { ...prev, [user]: [message] }; // Primer mensaje de un usuario
+			if(body !== "") return { ...prev, [user]: [...prev[user], message] }; // Mensaje normal
+
+				// Mensaje de confirmación de visto
+				// Marcar como visto los mensajes que este cliente envió
+				const newMessages = {...prev};
+				newMessages[user] = newMessages[user].map((msg) => (!msg.sent ? msg : {...msg, viewed: true}));
+				return newMessages;
+
 		});
 
 		return true; // Mantener el handler activo
@@ -97,9 +105,9 @@ const useXMPP = () => {
 		setUserStates({});
 	};
 
-	const sendMessage = (to, message) => {
+	const sendMessage = (recipientUser, message) => {
 		const msg = $msg({
-			to: `${to}@${consts.serverDomain}/${consts.connectionResource}`,
+			to: `${recipientUser}@${consts.serverDomain}/${consts.connectionResource}`,
 			from: connection.jid,
 			type: "chat",
 		})
@@ -108,6 +116,15 @@ const useXMPP = () => {
 
 		// Enviar el mensaje
 		connection.send(msg);
+
+		if(message === "") return; // No guardar mensajes de confirmación de visto
+
+		const messageObj = { user: recipientUser, message, date: new Date(), viewed: false, sent: true };
+		setMessages((prev) => {
+			if (!prev[recipientUser]) return { ...prev, [recipientUser]: [messageObj] };
+			return { ...prev, [recipientUser]: [...prev[recipientUser], messageObj] };
+		});
+
 	};
 
 	const getRoster = () => {
@@ -401,6 +418,24 @@ const useXMPP = () => {
 				return { ...prev, [user]: [] };
 			});
 
+		const sendViewedConfirmation = (user) => {
+			if(!messages[user]) return;	// No hay mensajes con el usuario
+			
+			// Verificar si hay mensajes no vistos
+			const notViewedMessages = messages[user].some((msg) => !msg.viewed && !msg.sent); 
+			if(!notViewedMessages) return;
+			console.log("Enviando confirmación de visto")
+			sendMessage(user, ""); // Mensaje vacío para confirmar que el mensaje fue visto
+
+			// marcar los mensajes que este cliente recibió como vistos
+			setMessages((prev) => {
+				const newMessages = {...prev};
+				newMessages[user] = newMessages[user].map((msg) => (msg.sent ? msg : {...msg, viewed: true}));
+				return newMessages;
+			});
+
+		}
+
 	return {
 		status,
 		connection,
@@ -422,6 +457,7 @@ const useXMPP = () => {
 		sendRoomMessage,
 		getUploadUrl,
 		createEmptyChat,
+		sendViewedConfirmation,
 	};
 };
 
