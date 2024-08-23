@@ -28,7 +28,7 @@ function ChatPage() {
 
   const sendMessageHandler = () => {
     const to = prompt("Para");
-    const message = prompt("Mensaje");
+    const message = prompt("Mensaje") ?? "";
     sendMessage(to, message);
   }
 

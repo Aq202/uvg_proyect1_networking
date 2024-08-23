@@ -1,5 +1,5 @@
 .chatsList{
-  padding-top: 20px;
+  padding-top: 10px;
   height: 100vh;
   border-right: 1px solid #ffffff24;
   display: flex;
@@ -13,7 +13,7 @@
   justify-content: space-between;
   padding: 0 20px;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 

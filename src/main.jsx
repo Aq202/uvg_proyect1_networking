@@ -2,7 +2,7 @@ window.global ||= window;
 
 import ReactDOM from 'react-dom/client'
 import App from './pages/App/App.jsx'
-import './index.css'
+import './styles/index.css'
 
 window.global = window
 

@@ -40,7 +40,7 @@ function ChatsList({onSelectedUserChange=null}) {
         .map((user) => {
 
           const lastMessage = messages[user].slice(-1)[0];
-          const notViewdMessages = messages[user].filter((message) => !message.viewed).length;
+          const notViewdMessages = messages[user].filter((message) => !message.viewed && !message.sent).length;
           const isContact = roster[user] !== undefined;
           const available = userStates[user]?.available === true;
 
@@ -52,7 +52,7 @@ function ChatsList({onSelectedUserChange=null}) {
 							notViewed={notViewdMessages}
 							active={available}
 							isContact={isContact}
-              date={lastMessage?.date}
+              date={lastMessage?.date?.toString()}
               onClick={setSelectedUser}
               selected={selectedUser === user}
 						/>
