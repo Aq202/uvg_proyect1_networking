@@ -53,12 +53,18 @@ function SingleChat({ user }) {
 
 
 	return (
-		<div className={styles.chat} onClick={() => sendViewedConfirmation(user)}>
-
-      <header className={styles.chatHeader}>
-        <h3 className={styles.title}>{user}</h3>
-        <AddContactButton className={styles.addContactButton} title={`Agregar a ${user} a contactos`} />
-      </header>
+		<div
+			className={styles.chat}
+			onClick={() => sendViewedConfirmation(user)}
+			onFocus={() => sendViewedConfirmation(user)}
+		>
+			<header className={styles.chatHeader}>
+				<h3 className={styles.title}>{user}</h3>
+				<AddContactButton
+					className={styles.addContactButton}
+					title={`Agregar a ${user} a contactos`}
+				/>
+			</header>
 			<div
 				className={`${styles.chatsContainer} ${scrollbarGray}`}
 				ref={chatContainerRef}
@@ -75,13 +81,13 @@ function SingleChat({ user }) {
 									date={message.date.toString()}
 									viewed={message.viewed}
 									showTriangle={firstMessage}
-                  refObj={index === messages[user].length - 1 ? lastChildRef : null}
+									refObj={index === messages[user].length - 1 ? lastChildRef : null}
 								/>
 							);
 						})}
 				</ul>
 			</div>
-			<ChatInput onSend={handleSend} />
+			<ChatInput onSend={handleSend} onKeyUp={()=> sendViewedConfirmation(user)} />
 		</div>
 	);
 }

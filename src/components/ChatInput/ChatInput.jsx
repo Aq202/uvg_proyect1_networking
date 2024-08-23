@@ -3,7 +3,7 @@ import styles from "./ChatInput.module.css";
 import { IoSend as SendIcon } from "react-icons/io5";
 import { useState } from 'react';
 
-function ChatInput({onSend}) {
+function ChatInput({onSend, onKeyUp}) {
 
   const [text, setText] = useState("");
 
@@ -18,6 +18,7 @@ function ChatInput({onSend}) {
     if(e.key === "Enter") {
       handleSend();
     }
+    if(onKeyUp) onKeyUp(e);
   }
 	return (
 		<div className={styles.inputContainer}>
@@ -40,4 +41,5 @@ export default ChatInput;
 
 ChatInput.propTypes = {
   onSend: PropTypes.func,
+  onKeyUp: PropTypes.func,
 };
