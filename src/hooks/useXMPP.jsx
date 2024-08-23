@@ -150,6 +150,9 @@ const useXMPP = () => {
 					const subscription = items[i].getAttribute("subscription");
 
 					contacts[user] = { user, alias, subscription };
+
+					// Añadir contacto a lista de mensajes si no existe
+					createEmptyChat(user);
 				}
 				// Añadir a variable de estado en context
 				setRoster(contacts);
