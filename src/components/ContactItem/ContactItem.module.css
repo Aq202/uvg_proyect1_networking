@@ -1,0 +1,73 @@
+.contactItem{
+  padding: 10px 20px 10px 20px;
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  align-items: center;
+  cursor: pointer;
+}
+
+.contactItem:hover{
+  background-color: #ffffff11;  
+}
+
+.contactItem.selected{
+  background-color: #ffffff24;  
+}
+
+.data{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.photo{
+  grid-row: 1/-1;
+  grid-column: 1;
+  margin-right: 10px;
+  align-self: self-start;
+}
+
+.name{
+  grid-row: 1;
+  grid-column: 2;
+  font-size: 17px;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+.secondaryUser{
+  color: #ffffff99;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.show, .status{
+  color: #ffffff99;
+  font-size: 14px;
+}
+
+.status{
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.acceptButton{
+  width: min-content;
+  white-space: nowrap;
+  outline: none;
+  padding: 7px 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: #6b8afd 1px solid;
+  background-color: transparent;
+  color: #6b8afd;
+  cursor: pointer;
+}
+
+.acceptButton:hover{
+  background-color: #6b8afd;
+  color: white;
+}

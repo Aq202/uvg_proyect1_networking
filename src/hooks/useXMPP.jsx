@@ -240,6 +240,11 @@ const useXMPP = () => {
 
 		// Guardar datos del estado del usuario
 		setUserStates((prev) => ({ ...prev, [user]: userStatus }));
+
+		// Verificar si el contacto está en el roster, si no está, actualizar roster
+		if (!roster[user]) {
+			getRoster();
+		}
 	};
 
 	const handleRoomPresence = (presence) => {
@@ -446,7 +451,7 @@ const useXMPP = () => {
 			// Verificar si hay mensajes no vistos
 			const notViewedMessages = messages[user].some((msg) => !msg.viewed && !msg.sent); 
 			if(!notViewedMessages) return;
-			console.log("Enviando confirmación de visto")
+			
 			sendMessage(user, ""); // Mensaje vacío para confirmar que el mensaje fue visto
 
 			// marcar los mensajes que este cliente recibió como vistos

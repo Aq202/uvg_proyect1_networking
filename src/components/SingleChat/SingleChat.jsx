@@ -39,7 +39,7 @@ function SingleChat({ user }) {
 			if(nickname){
 
 				// Agregar usuario o aceptar solicitud según corresponda
-				if(subscriptionRequests.includes(user)) acceptSubscription(user);
+				if(subscriptionRequests.includes(user)) acceptSubscription(user, nickname);
 				else addContact(user, nickname);
 			}
 		}
