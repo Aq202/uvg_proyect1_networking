@@ -8,7 +8,15 @@ import { useEffect, useRef, useState } from "react";
 import AddContactButton from "../AddContactButton/AddContactButton";
 
 function SingleChat({ user }) {
-	const { messages, sendMessage, sendViewedConfirmation} = useXMPP();
+	const {
+		messages,
+		roster,
+		subscriptionRequests,
+		sendMessage,
+		sendViewedConfirmation,
+		addContact,
+		acceptSubscription,
+	} = useXMPP();
 
   const [firstOpen, setFirstOpen] = useState(true);
 
@@ -23,6 +31,19 @@ function SingleChat({ user }) {
     scrollToBottom(); // Al mandar mensaje, scroll al final obligatorio
 		sendMessage(user, text);
 	};
+
+	const handleAddContactClick = () => {
+		const res = confirm(`¿Desea agregar a ${user} a tus contactos?`);
+		if (res) {
+			const nickname = prompt("Ingrese un apodo para este contacto");
+			if(nickname){
+
+				// Agregar usuario o aceptar solicitud según corresponda
+				if(subscriptionRequests.includes(user)) acceptSubscription(user);
+				else addContact(user, nickname);
+			}
+		}
+	}
 
   useEffect(() => {
     // Enviar al abrir al chat
@@ -51,7 +72,6 @@ function SingleChat({ user }) {
     }
 	}, [messages[user]]);
 
-
 	return (
 		<div
 			className={styles.chat}
@@ -60,10 +80,13 @@ function SingleChat({ user }) {
 		>
 			<header className={styles.chatHeader}>
 				<h3 className={styles.title}>{user}</h3>
-				<AddContactButton
-					className={styles.addContactButton}
-					title={`Agregar a ${user} a contactos`}
-				/>
+				{!roster[user] && (
+					<AddContactButton
+						className={styles.addContactButton}
+						title={`Agregar a ${user} a contactos`}
+						onClick={handleAddContactClick}
+					/>
+				)}
 			</header>
 			<div
 				className={`${styles.chatsContainer} ${scrollbarGray}`}
@@ -87,7 +110,10 @@ function SingleChat({ user }) {
 						})}
 				</ul>
 			</div>
-			<ChatInput onSend={handleSend} onKeyUp={()=> sendViewedConfirmation(user)} />
+			<ChatInput
+				onSend={handleSend}
+				onKeyUp={() => sendViewedConfirmation(user)}
+			/>
 		</div>
 	);
 }
