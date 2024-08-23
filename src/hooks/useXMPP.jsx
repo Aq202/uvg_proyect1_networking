@@ -153,6 +153,7 @@ const useXMPP = () => {
 				}
 				// Añadir a variable de estado en context
 				setRoster(contacts);
+				console.log(contacts)
 			},
 			function (error) {
 				console.error("Error al obtener lista de contactos:", error);
@@ -183,20 +184,22 @@ const useXMPP = () => {
 		});
 	};
 
-	const acceptSubscription = (jid, alias) => {
+	const acceptSubscription = (user, alias) => {
+		const jid = `${user}@${consts.serverDomain}`;
 		addContactToRoster(jid, alias).then(() => {
 			connection.send($pres({ to: jid, type: "subscribed" }));
 
 			// Eliminar de la lista de solicitudes
-			setSubscriptionRequests((prev) => prev.filter((user) => user !== jid));
+			setSubscriptionRequests((prev) => prev.filter((userName) => user !== userName));
 		});
 	};
 
 	function handleSubscriptionRequest(presence) {
 		const senderJid = Strophe.getBareJidFromJid(presence.getAttribute("from"));
+		const user = senderJid.split("@")[0];
 
 		// Agregar a la lista de solicitudes
-		setSubscriptionRequests((prev) => [...prev, senderJid]);
+		setSubscriptionRequests((prev) => [...prev, user]);
 
 		return true; // Continúa escuchando otros mensajes
 	}
