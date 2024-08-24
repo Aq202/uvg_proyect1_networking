@@ -412,16 +412,16 @@ const useXMPP = () => {
 			// Guardar el mensaje en el estado
 			setRooms((prev) => {
 				const newRooms = { ...prev };
-
+				const message = { nickname, message: messageText, date: new Date(), viewed: false };
 				if (!newRooms[room]) {
 					// Si la sala no existe, crearla
 					newRooms[room] = {
 						users: {},
-						messages: [{ nickname, message: messageText }],
+						messages: [message],
 					};
 				} else {
 					// Si la sala existe, agregar el mensaje
-					newRooms[room].messages.push({ nickname, message: messageText });
+					newRooms[room].messages.push(message);
 				}
 
 				return newRooms;
@@ -481,6 +481,16 @@ const useXMPP = () => {
 
 		}
 
+		const markAllRoomMessagesAsViewed = (room) => {
+			if(!rooms[room]) return; // No hay mensajes en la sala
+
+			setRooms((prev) => {
+				const newRooms = {...prev};
+				newRooms[room].messages = newRooms[room].messages.map((msg) => ({...msg, viewed: true}));
+				return newRooms;
+			});
+		}
+
 	return {
 		status,
 		connection,
@@ -504,6 +514,7 @@ const useXMPP = () => {
 		getUploadUrl,
 		createEmptyChat,
 		sendViewedConfirmation,
+		markAllRoomMessagesAsViewed,
 	};
 };
 

@@ -1,0 +1,31 @@
+.roomsList{
+  padding-top: 10px;
+  height: 100vh;
+  border-right: 1px solid #ffffff24;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  width: 400px;
+}
+
+.roomsList header{
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.roomsList header .title{
+  color: white;
+  font-size: 32px;
+}
+
+.listContainer{
+  overflow-y: auto;
+  list-style: none;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+}
