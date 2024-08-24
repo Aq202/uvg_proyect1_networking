@@ -4,6 +4,7 @@ import useXMPP from '../../hooks/useXMPP';
 import AddButton from '../AddButton/AddButton';
 import ChatItem from '../ChatItem/ChatItem';
 import styles from './ChatsList.module.css';
+import {scrollbarGray} from '../../styles/scrollbar.module.css';
 
 function ChatsList({onSelectedUserChange=null}) {
 
@@ -26,7 +27,7 @@ function ChatsList({onSelectedUserChange=null}) {
 				<AddButton onClick={handleCreateChat}/>
 			</header>
 
-			<ul className={styles.listContainer}>
+			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
 				{Object.keys(messages)
         .sort((user1, user2) => {
           // Ordenar por fecha del último mensaje (chats nuevos van al inicio)
@@ -41,17 +42,18 @@ function ChatsList({onSelectedUserChange=null}) {
 
           const lastMessage = messages[user].slice(-1)[0];
           const notViewdMessages = messages[user].filter((message) => !message.viewed && !message.sent).length;
-          const isContact = roster[user] !== undefined;
           const available = userStates[user]?.available === true;
+          const isContact = roster[user]?.subscription === 'both';
 
 					return (
 						<ChatItem
 							key={user}
 							user={user}
+              alias={roster[user]?.alias}
 							message={lastMessage?.message}
 							notViewed={notViewdMessages}
 							active={available}
-							isContact={isContact}
+							showStatus={isContact}
               date={lastMessage?.date?.toString()}
               onClick={setSelectedUser}
               selected={selectedUser === user}

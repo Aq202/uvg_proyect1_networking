@@ -4,6 +4,8 @@ import useXMPP from "../../hooks/useXMPP";
 import AddButton from "../AddButton/AddButton";
 import styles from "./ContactsList.module.css";
 import ContactItem from "../ContactItem/ContactItem";
+import {scrollbarGray} from '../../styles/scrollbar.module.css';
+
 
 function ContactsList({ onSelectedUserChange = null }) {
 	const { roster, userStates, subscriptionRequests, acceptSubscription, addContact } = useXMPP();
@@ -39,7 +41,7 @@ function ContactsList({ onSelectedUserChange = null }) {
 				<AddButton onClick={handleNewContact} title="Agregar nuevo contacto"/>
 			</header>
 
-      <div className={styles.listsContainer}>
+      <div className={`${styles.listsContainer} ${scrollbarGray}`}>
       <ul className={styles.list}>
 			{contacts.map((contact) => {
 

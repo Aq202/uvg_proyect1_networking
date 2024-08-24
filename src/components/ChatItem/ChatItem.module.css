@@ -31,6 +31,12 @@
   max-width: 90%;
 }
 
+.secondaryUser{
+  color: #ffffff99;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .date{
   grid-row: 1;
   grid-column: 3;

@@ -9,12 +9,13 @@ import dayjs from 'dayjs';
  */
 function ChatItem({
 	user = "",
+	alias = null,
 	message = "",
 	date = "",
 	active = false,
 	notViewed = 0,
   selected = false,
-  isContact = false,
+  showStatus = false,
   onClick = null,
 }) {
 
@@ -47,9 +48,11 @@ function ChatItem({
 				name={user}
 				className={styles.photo}
 				isActive={active}
-				showStatus={isContact}
+				showStatus={showStatus}
 			/>
-			<span className={styles.name}>{user}</span>
+			<span className={styles.name}>
+				{alias ? <>{alias} <span className={styles.secondaryUser}>{`(${user})`}</span></> : user}
+			</span>
 			<span className={styles.date}>{formatDate(date)}</span>
 			<p className={styles.lastMessage}>{message}</p>
 			{notViewed > 0 && <span className={styles.notViewed}>{notViewed}</span>}
@@ -61,11 +64,12 @@ export default ChatItem;
 
 ChatItem.propTypes = {
 	user: PropTypes.string.isRequired,
+	alias: PropTypes.string,
 	message: PropTypes.string,
 	date: PropTypes.string,
 	active: PropTypes.bool,
 	notViewed: PropTypes.number,
   selected: PropTypes.bool,
-  isContact: PropTypes.bool,
+  showStatus: PropTypes.bool,
   onClick: PropTypes.func,
 };
