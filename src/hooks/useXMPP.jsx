@@ -10,12 +10,14 @@ const useXMPP = () => {
 		rooms,
 		messages,
 		roster,
+		userStatus,
 		userStates,
 		setSubscriptionRequests,
 		setUserStates,
 		setRooms,
 		setMessages,
 		setRoster,
+		setUserStatus,
 	} = useContext(XMPPContext);
 
 	const status = {
@@ -84,6 +86,7 @@ const useXMPP = () => {
 					connection.send($pres({})); // Enviar presence con status 'disponible'
 
 					getRoster();
+					changeState({show: presenceShowValues.AVAILABLE});
 				}
 
 				if (callback) callback(resStatus);
@@ -233,13 +236,17 @@ const useXMPP = () => {
 			available: type !== "unavailable",
 		};
 
-		if (userStatus.available) {
-			userStatus.show = Strophe.getText(presence.getElementsByTagName("show")[0]);
-			userStatus.status = Strophe.getText(presence.getElementsByTagName("status")[0]);
-		}
-
 		// Guardar datos del estado del usuario
-		setUserStates((prev) => ({ ...prev, [user]: userStatus }));
+		setUserStates((prev) => {
+			const prevUserStatus = prev[user] ?? {};
+
+			if (userStatus.available) {
+				userStatus.show = Strophe.getText(presence.getElementsByTagName("show")[0]) ?? prevUserStatus.show;
+				userStatus.status = Strophe.getText(presence.getElementsByTagName("status")[0]) ?? prevUserStatus.status;
+			}
+
+			return {...prev, [user]: userStatus};
+		});
 
 		// Verificar si el contacto está en el roster, si no está, actualizar roster
 		if (!roster[user]) {
@@ -296,8 +303,19 @@ const useXMPP = () => {
 		return true;
 	};
 
-	const changeState = (show, status) => {
-		connection.send($pres().c("show").t(show).up().c("status").t(status));
+	const changeState = ({show, status}) => {
+		const pres = $pres();
+		if (show) pres.c("show").t(show);
+		if (status && !show) pres.c("status").t(status);
+		else if(status) pres.up().c("status").t(status);
+
+		connection.send(pres);
+
+		setUserStatus(prev => {
+			const showValue = show ?? prev.show;
+			const statusValue = status ?? prev.status;
+			return { show: showValue, status: statusValue };
+		})
 	};
 
 	const deleteAccount = () =>
@@ -472,6 +490,7 @@ const useXMPP = () => {
 		messages,
 		roster,
 		userStates,
+		userStatus,
 		connect,
 		disconnect,
 		sendMessage,

@@ -6,6 +6,7 @@ import SingleChat from '../../components/SingleChat/SingleChat';
 import { useState } from 'react';
 import useSession from '../../hooks/useSession';
 import ContactsList from '../../components/ContactsList/ContactsList';
+import UserProfile from '../../components/UserProfile/UserProfile';
 
 const menuOption = {
   CHATS: 'CHATS',
@@ -32,6 +33,7 @@ function ChatPage() {
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={setCurrentSingleChat}/>}
       {selectedOption === menuOption.CONTACTS && <ContactsList onSelectedUserChange={setCurrentSingleChat} />}
+      {selectedOption === menuOption.PROFILE && <UserProfile/>}
       {currentSingleChat && <SingleChat user={currentSingleChat}/>}
 
     </div>

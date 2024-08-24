@@ -8,6 +8,7 @@ const XMPPContext = createContext();
 
 export const XMPPProvider = ({ children }) => {
 
+    const [userStatus, setUserStatus] = useState({});
     const [connection, setConnection] = useState(null);
 	const [subscriptionRequests, setSubscriptionRequests] = useState([]); 
     const [userStates, setUserStates] = useState({});
@@ -28,11 +29,13 @@ export const XMPPProvider = ({ children }) => {
         messages,
         roster,
         userStates,
+        userStatus,
         setRooms,
         setSubscriptionRequests,
         setUserStates,
         setMessages,
         setRoster,
+        setUserStatus
     }
 
     return (
