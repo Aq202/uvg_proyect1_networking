@@ -10,6 +10,12 @@ export default defineConfig({
       'strophe.js': path.resolve(__dirname, 'node_modules/strophe.js'),
     }
   },
+  define: {
+    'process.env': {},
+    global: {},
+    "global.WebSocket": "window.WebSocket",
+    "global.btoa": "window.btoa.bind(window)",
+  },
   optimizeDeps: {
     esbuildOptions: {
       define: {

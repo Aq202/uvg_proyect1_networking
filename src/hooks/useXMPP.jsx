@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import XMPPContext from "../context/XMPPContext";
 import { Strophe, $pres, $msg, $iq } from "strophe.js";
+import { client, xml } from '@xmpp/client/browser';
 import consts from "../utils/consts";
 
 const useXMPP = () => {
@@ -491,6 +492,73 @@ const useXMPP = () => {
 			});
 		}
 
+		const register = (user, password) =>
+			new Promise((resolve, reject) => {
+				try {
+					const xmppClient = client({
+						service: `ws://${consts.serverDomain}:${consts.serverPort}/ws`,
+						resource: consts.connectionResource,
+					});
+
+					xmppClient.on("error", (err) => {
+						if (err.code === "ECONERROR") {
+							xmppClient.stop();
+							xmppClient.removeAllListeners();
+							reject({ status: false, message: "Error en el cliente XMPP" });
+						}
+					});
+
+					xmppClient.on("open", () => {
+						const iq = xml(
+							"iq",
+							{ type: "set", to: "alumchat.lol", id: "register" },
+							xml(
+								"query",
+								{ xmlns: "jabber:iq:register" },
+								xml("username", {}, user),
+								xml("password", {}, password)
+							)
+						);
+						xmppClient.send(iq);
+					});
+
+					xmppClient.on("stanza", async (stanza) => {
+						if (stanza.is("iq") && stanza.getAttr("id") === "register") {
+							await xmppClient.stop();
+							xmppClient.removeAllListeners();
+
+							if (stanza.getAttr("type") === "result") {
+
+								// Registro exitoso
+								resolve({ status: true, message: "Registro exitoso." });
+
+							} else if (stanza.getAttr("type") === "error") {
+
+								// Error manejado del servidor
+								const error = stanza.getChild("error");
+								if (error?.getChild("conflict")) {
+									reject({ status: false, message: "El nombre de usuario no está disponible." });
+								}
+								reject({
+									status: false,
+									message: "Ocurrió un error en tu registro. Intenta nuevamente.",
+								});
+							}
+						}
+					});
+
+					xmppClient.start().catch((err) => {
+						// Se ignora el error invalid-mechanism (ya que es propio de la libreria)
+						if (!err.toString().includes("invalid-mechanism")) {
+							reject({ status: false, message: "Ocurrió un error en la conexión." });
+						}
+					});
+				} catch (error) {
+					reject({ status: false, message: "Ocurrió un error en el registro." });
+				}
+			});
+		
+
 	return {
 		status,
 		connection,
@@ -515,6 +583,7 @@ const useXMPP = () => {
 		createEmptyChat,
 		sendViewedConfirmation,
 		markAllRoomMessagesAsViewed,
+		register,
 	};
 };
 
