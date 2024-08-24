@@ -5,7 +5,6 @@
 
   --global-font-family--: 'Montserrat', 'Inter', sans-serif;
 
-  --error-color--: #df0303;
 
   --text-font-size--: 16px;
   --h1-title-size--: 35px;
@@ -36,4 +35,12 @@ html, body, #root {
 #root {
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+a{
+  color: blue;
+}
+
+a:active{
+  color: rgb(18, 103, 250);
 }

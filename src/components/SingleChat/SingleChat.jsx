@@ -16,6 +16,7 @@ function SingleChat({ user }) {
 		sendViewedConfirmation,
 		addContact,
 		acceptSubscription,
+		getUploadUrl,
 	} = useXMPP();
 
   const [firstOpen, setFirstOpen] = useState(true);
@@ -30,6 +31,22 @@ function SingleChat({ user }) {
 	const handleSend = (text) => {
     scrollToBottom(); // Al mandar mensaje, scroll al final obligatorio
 		sendMessage(user, text);
+	};
+
+	const handleSendFile = (file) => {
+		if (file) {
+			getUploadUrl({ filename: file.name, size: file.size, contentType: file.type }).then((url) => {
+				fetch(url, {
+					method: "PUT",
+					body: file,
+				}).then(() => {
+					
+					// Enviar url por mensaje
+					handleSend(url);
+
+				});
+			});
+		}
 	};
 
 	const handleAddContactClick = () => {
@@ -113,6 +130,7 @@ function SingleChat({ user }) {
 			<ChatInput
 				onSend={handleSend}
 				onKeyUp={() => sendViewedConfirmation(user)}
+				onFileSend={handleSendFile}
 			/>
 		</div>
 	);

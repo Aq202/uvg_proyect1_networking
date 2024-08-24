@@ -58,6 +58,11 @@
   overflow-wrap: break-word;
   hyphens: auto;
 }
+
+.imageMessage{
+  max-height: 50vh;
+  max-width: 100%;
+}
 .user{
   font-weight: bold;
   font-size: 18px;
