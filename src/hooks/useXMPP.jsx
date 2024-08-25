@@ -71,18 +71,9 @@ const useXMPP = () => {
 				if (resStatus === status.CONNECTED) {
 					connection.addHandler(onMessage, null, "message", "chat", null); // Escuchar mensajes
 					connection.addHandler(handleSubscriptionRequest, null, "presence", "subscribe"); // Escuchar solicitudes de suscripción
+					connection.addHandler(handleSubscriptionAccepted, null, "presence", "subscribed"); // Escuchar cuando una suscripción es aceptada
 					connection.addHandler(onPresence, null, "presence"); // Escuchar presencia
 					connection.addHandler(onRoomMessage, null, "message", "groupchat"); // Escuchar mensajes de salas de chat
-
-					connection.addHandler(
-						(stanza) => {
-							console.error("Error recibido:", Strophe.serialize(stanza));
-							return true; // Mantener el manejador activo
-						},
-						null,
-						"message",
-						"error"
-					);
 
 					connection.send($pres({})); // Enviar presence con status 'disponible'
 
@@ -224,7 +215,13 @@ const useXMPP = () => {
 			setSubscriptionRequests((prev) => [...prev, user]);
 
 			return true; // Continúa escuchando otros mensajes
-	})
+		})
+	}
+
+	const handleSubscriptionAccepted = () => {
+		getRoster();
+		setTimeout(getRoster, 3000); // Actualizar roster después de un tiempo
+
 	}
 
 	const handleStatusPresence = (presence) => {
@@ -249,10 +246,6 @@ const useXMPP = () => {
 			return {...prev, [user]: userStatus};
 		});
 
-		// Verificar si el contacto está en el roster, si no está, actualizar roster
-		if (!roster[user]) {
-			getRoster();
-		}
 	};
 
 	const handleRoomPresence = (presence) => {
@@ -293,7 +286,6 @@ const useXMPP = () => {
 
 	const onPresence = (presence) => {
 		const from = presence.getAttribute("from");
-
 		// Diferenciar entre presencias de usuarios y de salas de chat
 		if (from.includes("conference")) {
 			handleRoomPresence(presence);
@@ -556,8 +548,7 @@ const useXMPP = () => {
 				} catch (error) {
 					reject({ status: false, message: "Ocurrió un error en el registro." });
 				}
-			});
-		
+			});		
 
 	return {
 		status,

@@ -8,7 +8,7 @@ import {scrollbarGray} from '../../styles/scrollbar.module.css';
 
 
 function ContactsList({ onSelectedUserChange = null }) {
-	const { roster, userStates, subscriptionRequests, acceptSubscription, addContact } = useXMPP();
+	const { roster, userStates, subscriptionRequests, acceptSubscription, addContact, getRoster } = useXMPP();
 	const [selectedUser, setSelectedUser] = useState(null);
 
   const handleAcceptSubscription = (user) => {
@@ -25,6 +25,11 @@ function ContactsList({ onSelectedUserChange = null }) {
     const alias = prompt("Ingrese un apodo para este contacto");
     if(alias) addContact(user, alias);
   }
+
+	useEffect(() => {
+		// Actualizar roster
+		getRoster();
+	}, []);
 
 	useEffect(() => {
 		if (onSelectedUserChange) onSelectedUserChange(selectedUser);
