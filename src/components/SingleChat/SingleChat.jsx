@@ -15,7 +15,6 @@ function SingleChat({ user }) {
 		sendMessage,
 		sendViewedConfirmation,
 		addContact,
-		acceptSubscription,
 		getUploadUrl,
 	} = useXMPP();
 
@@ -55,9 +54,8 @@ function SingleChat({ user }) {
 			const nickname = prompt("Ingrese un apodo para este contacto");
 			if(nickname){
 
-				// Agregar usuario o aceptar solicitud según corresponda
-				if(subscriptionRequests.includes(user)) acceptSubscription(user, nickname);
-				else addContact(user, nickname);
+				// Agregar usuario
+				addContact(user, nickname);
 			}
 		}
 	}
@@ -88,7 +86,7 @@ function SingleChat({ user }) {
       }
     }
 	}, [messages[user]]);
-
+	
 	return (
 		<div
 			className={styles.chat}
@@ -97,7 +95,7 @@ function SingleChat({ user }) {
 		>
 			<header className={styles.chatHeader}>
 				<h3 className={styles.title}>{user}</h3>
-				{!roster[user] && (
+				{!roster[user] &&  !subscriptionRequests.includes(user) && (
 					<AddContactButton
 						className={styles.addContactButton}
 						title={`Agregar a ${user} a contactos`}
