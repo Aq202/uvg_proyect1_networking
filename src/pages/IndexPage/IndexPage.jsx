@@ -2,32 +2,25 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "../LoginPage/LoginPage";
 import useSession from "../../hooks/useSession";
 import ChatPage from "../ChatPage/ChatPage";
-import ChatPageTest from "../ChatPage/ChatPageTest";
+import RegisterPage from "../RegisterPage/RegisterPage";
 
 function IndexPage() {
 	const {session} = useSession();
 
-	let page = null;
-	let testPage = null;
+	let routes = null;
 
 	if (session === null) {
-		page = <LoginPage />;
-		testPage = <LoginPage />
+		routes = 	<Routes>
+								<Route path="/register" element={<RegisterPage />} />
+								<Route path="*" element={<LoginPage />} />
+							</Routes>;
 	} else if (session !== undefined) {
-		page = <ChatPage />;
-		testPage = <ChatPageTest />
+		routes = 	<Routes>
+								<Route path="*" element={<ChatPage />} />
+							</Routes>
 	}
 	return (
-		<Routes>
-			<Route
-				path="/test"
-				element={testPage}
-			/>
-			<Route
-				path="*"
-				element={page}
-			/>
-		</Routes>
+		routes
 	);
 }
 

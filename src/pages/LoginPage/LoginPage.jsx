@@ -2,55 +2,52 @@
 import { useState } from "react";
 import useSession from "../../hooks/useSession";
 import styles from "./LoginPage.module.css";
-import useXMPP from "../../hooks/useXMPP";
+import { Link } from "react-router-dom";
+import Spinner from "../../components/Spinner/Spinner";
 
 function LoginPage() {
 	const { login} = useSession();
-	const {register} = useXMPP();
 
-	const [loginError, setLoginError] = useState(false);
+	const [loginError, setLoginError] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [user, setUser] = useState("");
+	const [password, setPassword] = useState("");
 
-	const loginHandler = () => {
+	const loginHandler = (e) => {
+		e.preventDefault();
+		// Validar campos
+		if(user.trim().length === 0 || password.trim().length === 0) {
+			setLoginError("Debes completar los campos para iniciar sesión.");
+			return;
+		}
 
 		setLoading(true);
 		setLoginError(false);
 
 		login({
-			user: prompt("Usuario"),
-			password: prompt("Contraseña"),
+			user,
+			password,
 			callback: (success) => {
-
-				if(!success) setLoginError(true);
+				if(!success) setLoginError("Usuario o contraseña incorrectos.");
 				setLoading(false);
 			},
 		});
 	};
 
-	const registerHandler = () => {
-		const user = prompt("Usuario");
-		if(!user) return;
-		const password = prompt("Contraseña");
-		if(!password) return;
-
-		register(user, password).then(res=>{
-			console.log(res);
-		}).catch(err=>{
-			console.error("Error al registrar (login)", err);
-		})
-	}
-	
 	return (
-		<div className={styles.Login}>
-			<h1>Login</h1>
-			<button
-				onClick={loginHandler}
-			>
-				Login
-			</button>
-			<button onClick={registerHandler}>Registrate</button>
-			{loading && <p>Cargando...</p>}
-			{loginError && <p>Usuario o contraseña incorrectos.</p>}
+		<div className={styles.loginPage}>
+			
+			<h1 className={styles.title}>XMPP CHAT</h1>
+			<form className={styles.loginBody} onSubmit={loginHandler}>
+				<p className={styles.instructions}>Ingresa tus credenciales para iniciar sesión</p>
+				<input type="text" className={styles.input} placeholder="Usuario" value={user} onChange={e => setUser(e.target.value)}/>
+				<input type="password" className={styles.input} placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)}/>
+				{!loading ? (
+					<button type="submit" className={styles.button}>Iniciar sesión</button>
+				) : <Spinner className={styles.spinner}/>}
+				{loginError && <p className={styles.error}>{loginError}</p>}
+			</form>
+			<Link to="/register" className={styles.registerLink}>Registrarse</Link>
 		</div>
 	);
 }
