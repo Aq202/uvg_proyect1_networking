@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import styles from "./ChatInput.module.css";
 import { IoSend as SendIcon } from "react-icons/io5";
@@ -10,6 +10,7 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 	const [file, setFile] = useState();
 
   const fileInputRef = useRef(null);
+	const textInputRef = useRef(null);
   
 	const handleSend = () => {
 
@@ -41,6 +42,10 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
     fileInputRef.current.value = "";
   }
 
+	useEffect(() => {
+		textInputRef.current.focus();
+	}, []);
+
 	return (
 		<div className={styles.inputContainer}>
 			<label
@@ -67,6 +72,7 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 						value={text}
 						onChange={(e) => setText(e.target.value)}
 						onKeyUp={handleKeyUp}
+						ref={textInputRef}
 					/>
 				</>
 			)}
