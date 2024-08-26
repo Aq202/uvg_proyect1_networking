@@ -52,5 +52,3 @@ To run the vite server it is required to have an updated version of Node.js and 
    ```
    npm run dev
    ```
-
-    **Note (optional)**: The production html, css and js files are located in ./production. These can be used with the vsCode live-server extension, for example.
