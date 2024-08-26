@@ -4,7 +4,7 @@ import Message from "../Message/Message";
 import styles from "./SingleChat.module.css";
 import useXMPP from "../../hooks/useXMPP";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import AddContactButton from "../AddContactButton/AddContactButton";
 
 /**
@@ -28,7 +28,7 @@ function SingleChat({ user }) {
 		getUploadUrl,
 	} = useXMPP();
 
-  const [firstOpen, setFirstOpen] = useState(true);
+	const forceScrollRef = useRef(true);
 
 	const chatContainerRef = useRef();
   const lastChildRef = useRef();
@@ -71,18 +71,20 @@ function SingleChat({ user }) {
 	}
 
   useEffect(() => {
-    // Enviar al abrir al chat
+		if(!user) return;
+    // Enviar al abrir al chat (o cambiar de chat)
     sendViewedConfirmation(user);
-  }, []);
+		forceScrollRef.current = true;
+  }, [user]);
 
 	useEffect(() => {
 
     if (chatContainerRef.current && lastChildRef.current) {
 
-      if(firstOpen){
+      if(forceScrollRef.current){
         // Si es la primera vez que se abre el chat, hacer scroll al final
         scrollToBottom();
-        setFirstOpen(false);
+        forceScrollRef.current = false;
       }
 
       // Cuando se recibe un mensaje, verificar si el último mensaje es visible

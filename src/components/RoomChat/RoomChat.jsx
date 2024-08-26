@@ -66,7 +66,8 @@ function RoomChat({ room }) {
   useEffect(() => {
     // Enviar al abrir al chat
     markAllRoomMessagesAsViewed(room);
-  }, []);
+		scrollToBottom();
+  }, [room]);
 
 	useEffect(() => {
 
