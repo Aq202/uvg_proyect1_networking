@@ -53,7 +53,7 @@ To run the vite server it is required to have an updated version of Node.js and 
    npm run dev
    ```
 
-3. **Abrir el navegador y ejecutar localhost en el puerto 5173**
+3. **Open browser and run localhost on port 5173**
 
     ```
     http://localhost:5173/
