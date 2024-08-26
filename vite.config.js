@@ -14,7 +14,6 @@ export default defineConfig({
     'process.env': {},
     global: {},
     "global.WebSocket": "window.WebSocket",
-    "global.btoa": "window.btoa.bind(window)",
   },
   optimizeDeps: {
     esbuildOptions: {
