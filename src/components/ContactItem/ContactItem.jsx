@@ -4,8 +4,22 @@ import UserPicture from "../UserPicture/UserPicture";
 import useXMPP from "../../hooks/useXMPP";
 
 /**
+ * Componente de elemento de contacto que representa un usuario en una lista de contactos de una aplicación de chat.
  *
- * @param onClick Function. Function to call when the contact item is clicked. Gives as parameter the user.
+ * Este componente muestra información del contacto, como el nombre de usuario, alias, estado de presencia y estado personalizado.
+ * También permite al usuario interactuar con el contacto, como seleccionarlo o aceptar una solicitud de contacto.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {string} props.user - El nombre de usuario del contacto. **Requerido**.
+ * @param {string|null} props.alias - Un alias opcional para mostrar en lugar del nombre de usuario.
+ * @param {string} props.show - El estado de presencia del contacto (por ejemplo, disponible, ausente).
+ * @param {string} props.status - El estado personalizado del contacto.
+ * @param {boolean} props.active - Indica si el contacto está activo.
+ * @param {boolean} props.selected - Indica si el contacto está seleccionado.
+ * @param {boolean} props.showActiveStatus - Indica si se debe mostrar el estado de actividad del contacto.
+ * @param {boolean} props.showAcceptButton - Indica si se debe mostrar un botón para aceptar una solicitud de contacto.
+ * @param {function} props.onClick - Función a ejecutar cuando se hace clic en el contacto. Recibe como parámetro el nombre de usuario.
+ * @param {function} props.onAcceptButtonClick - Función a ejecutar cuando se hace clic en el botón "Aceptar solicitud".
  */
 function ContactItem({
 	user = "",

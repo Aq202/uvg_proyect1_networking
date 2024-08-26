@@ -5,6 +5,17 @@ import { IoSend as SendIcon } from "react-icons/io5";
 import { MdAttachFile as AttachFileIcon } from "react-icons/md";
 import { IoClose as CloseIcon } from "react-icons/io5";
 
+/**
+ * Componente de entrada de chat que permite al usuario escribir mensajes y adjuntar archivos.
+ *
+ * Este componente incluye un campo de texto para mensajes, un botón para adjuntar archivos, y un botón para enviar el mensaje.
+ * Muestra el nombre del archivo adjunto y permite cancelarlo.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {Function} [props.onSend] - Función a ejecutar cuando se envía un mensaje de texto.
+ * @param {Function} [props.onFileSend] - Función a ejecutar cuando se envía un archivo.
+ * @param {Function} [props.onKeyUp] - Función a ejecutar en el evento `onKeyUp` del campo de texto.
+ */
 function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 	const [text, setText] = useState("");
 	const [file, setFile] = useState();

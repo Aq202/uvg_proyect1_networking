@@ -4,6 +4,10 @@ import { Strophe, $pres, $msg, $iq } from "strophe.js";
 import { client, xml } from '@xmpp/client/browser';
 import consts from "../utils/consts";
 
+/**
+ * Hook personalizado para manejar la lógica de XMPP dentro de la aplicación.
+ * @returns {Object} Funciones y estados relacionados con la conexión XMPP.
+ */
 const useXMPP = () => {
 	const {
 		connection,
@@ -40,6 +44,11 @@ const useXMPP = () => {
 		XA: "xa",
 	};
 
+	/**
+	 * Maneja los mensajes entrantes.
+	 * @param {Element} msg - El mensaje XML recibido.
+	 * @returns {boolean} `true` para mantener el manejador activo.
+	 */
 	const onMessage = (msg) => {
 		const from = msg.getAttribute("from");
 		const body = msg.getElementsByTagName("body")[0].textContent;
@@ -62,7 +71,13 @@ const useXMPP = () => {
 
 		return true; // Mantener el handler activo
 	};
-
+	
+	/**
+	 * Conecta al usuario al servidor XMPP.
+	 * @param {string} user - El nombre de usuario.
+	 * @param {string} password - La contraseña del usuario.
+	 * @param {function} callback - Función a ejecutar después de la conexión.
+	 */
 	const connect = (user, password, callback) => {
 		connection.connect(
 			`${user}@${consts.serverDomain}/${consts.connectionResource}`,
@@ -86,6 +101,9 @@ const useXMPP = () => {
 		);
 	};
 
+	/**
+	 * Desconecta al usuario del servidor XMPP y limpia las variables de estado.
+	 */
 	const disconnect = () => {
 		//Enviar presence de status de desconexión
 		connection.send($pres({ type: "unavailable" }));
@@ -100,6 +118,11 @@ const useXMPP = () => {
 		setUserStates({});
 	};
 
+	/**
+	 * Envía un mensaje a otro usuario.
+	 * @param {string} recipientUser - El nombre de usuario del destinatario.
+	 * @param {string} message - El mensaje a enviar.
+	 */
 	const sendMessage = (recipientUser, message) => {
 		const msg = $msg({
 			to: `${recipientUser}@${consts.serverDomain}/${consts.connectionResource}`,
@@ -161,6 +184,12 @@ const useXMPP = () => {
 		);
 	});
 
+	/**
+	 * Agrega un contacto al roster.
+	 * @param {string} jid - El JID del usuario a agregar.
+	 * @param {string} name - El nombre del usuario a agregar.
+	 * @returns {Promise<void>} Promesa que se resuelve cuando el contacto ha sido agregado.
+	 */
 	const addContactToRoster = (jid, name) =>
 		new Promise((resolve, reject) => {
 			const iq = $iq({
@@ -179,7 +208,12 @@ const useXMPP = () => {
 				getRoster().then(resolve()); // Resolver promesa hasta actualizar roster
 			}, reject);
 		});
-
+	
+	/**
+	 * Agrega un contacto y envía una solicitud de suscripción.
+	 * @param {string} user - El nombre de usuario del contacto.
+	 * @param {string} alias - El alias del contacto.
+	 */
 	const addContact = (user, alias) => {
 		const jid = `${user}@${consts.serverDomain}`;
 		addContactToRoster(jid, alias).then(() => {
@@ -187,6 +221,11 @@ const useXMPP = () => {
 		});
 	};
 
+	/**
+	 * Acepta una solicitud de suscripción de otro usuario.
+	 * @param {string} user - El nombre de usuario del solicitante.
+	 * @param {string} alias - El alias del solicitante.
+	 */
 	const acceptSubscription = (user, alias) => {
 		const jid = `${user}@${consts.serverDomain}`;
 		addContactToRoster(jid, alias).then(() => {
@@ -198,6 +237,11 @@ const useXMPP = () => {
 		});
 	};
 
+	/**
+	 * Maneja una solicitud de suscripción entrante.
+	 * @param {Element} presence - El elemento de presencia XML recibido.
+	 * @returns {boolean} `true` para mantener el manejador activo.
+	 */
 	function handleSubscriptionRequest(presence) {
 
 		getRoster().then(rosterResult => {
@@ -218,12 +262,19 @@ const useXMPP = () => {
 		})
 	}
 
+	/**
+	 * Callback para cuando una suscripción es aceptada. Actualiza el roster
+	 */
 	const handleSubscriptionAccepted = () => {
 		getRoster();
 		setTimeout(getRoster, 3000); // Actualizar roster después de un tiempo
 
 	}
 
+	/**
+	 * Maneja la presencia de estado de usuarios en el roster.
+	 * @param {Element} presence - El elemento de presencia XML recibido.
+	 */
 	const handleStatusPresence = (presence) => {
 		const from = presence.getAttribute("from");
 		const type = presence.getAttribute("type");
@@ -248,6 +299,10 @@ const useXMPP = () => {
 
 	};
 
+	/**
+	 * Maneja la presencia de usuarios en una sala de chat.
+	 * @param {Element} presence - El elemento de presencia XML recibido.
+	 */
 	const handleRoomPresence = (presence) => {
 		const from = presence.getAttribute("from");
 		const type = presence.getAttribute("type");
@@ -284,6 +339,11 @@ const useXMPP = () => {
 		});
 	};
 
+	/**
+	 * Maneja actualizaciones de presencia de otros usuarios.
+	 * @param {Element} presence - El elemento de presencia XML recibido.
+	 * @returns {boolean} `true` para mantener el manejador activo.
+	 */
 	const onPresence = (presence) => {
 		const from = presence.getAttribute("from");
 		// Diferenciar entre presencias de usuarios y de salas de chat
@@ -296,6 +356,10 @@ const useXMPP = () => {
 		return true;
 	};
 
+	/**
+	 * Cambia el estado de presencia del usuario actual.
+	 * @param {Object} status - El nuevo estado de presencia del usuario.
+	 */
 	const changeState = ({show, status}) => {
 		const pres = $pres();
 		if (show) pres.c("show").t(show);
@@ -311,6 +375,10 @@ const useXMPP = () => {
 		})
 	};
 
+	/**
+	 * Eliminar la cuenta del usuario en sesión.
+	 * @returns Promise. Resolve(). Reject()
+	 */
 	const deleteAccount = () =>
 		new Promise((resolve, reject) => {
 			const iq = $iq({ type: "set", to: connection.domain })
@@ -336,6 +404,11 @@ const useXMPP = () => {
 		connection.sendIQ(iq, null, null);
 	};
 
+	/**
+	 * Crea una sala de chat o se une a una sala existente.
+	 * @param {string} room - El nombre de la sala de chat.
+	 * @param {boolean} create - Indica si se debe crear la sala si no existe.
+	 */
 	const joinRoom = (roomName, nick) =>
 		new Promise((resolve, reject) => {
 			const presence = $pres({
@@ -376,7 +449,12 @@ const useXMPP = () => {
 				`${roomName}@conference.${consts.serverDomain}/${nick}`
 			);
 		});
-
+	
+	/**
+	 * Envía un mensaje en una sala de chat.
+	 * @param {string} room - El nombre de la sala de chat.
+	 * @param {string} message - El mensaje a enviar.
+	 */
 	const sendRoomMessage = (roomName, message) => {
 		const msg = $msg({
 			to: `${roomName}@conference.${consts.serverDomain}`,
@@ -388,6 +466,11 @@ const useXMPP = () => {
 		connection.send(msg);
 	};
 
+	/**
+	 * Maneja mensajes entrantes en una sala de chat.
+	 * @param {Element} msg - El elemento de mensaje XML recibido.
+	 * @returns {boolean} `true` para mantener el manejador activo.
+	 */
 	const onRoomMessage = (msg) => {
 		const from = msg.getAttribute("from");
 		const roomJid = Strophe.getBareJidFromJid(from);
@@ -424,6 +507,13 @@ const useXMPP = () => {
 		return true; // Mantener el manejador activo
 	};
 
+	/**
+	 * Obtiene la URL de subida de un archivo
+	 * @param {string} filename - Nombre del archivo
+	 * @param {number} size - Tamaño del archivo
+	 * @param {string} contentType - Tipo de contenido del archivo
+	 * @returns 
+	 */
 	const getUploadUrl = ({ filename, size, contentType }) =>
 		new Promise((resolve, reject) => {
 			// Solicitar URL de subida
@@ -450,105 +540,124 @@ const useXMPP = () => {
 			);
 		});
 
-		const createEmptyChat = (user) =>
-			setMessages((prev) => {
-				if (prev[user]) return prev;
-				return { ...prev, [user]: [] };
-			});
+	/**
+	 * Crea un nuevo chat con un contacto si no existe previamente.
+	 * @param {string} user - El nombre de usuario con el que iniciar el chat.
+	 */
+	const createEmptyChat = (user) =>
+		setMessages((prev) => {
+			if (prev[user]) return prev;
+			return { ...prev, [user]: [] };
+	});
 
-		const sendViewedConfirmation = (user) => {
-			if(!messages[user]) return;	// No hay mensajes con el usuario
-			
-			// Verificar si hay mensajes no vistos
-			const notViewedMessages = messages[user].some((msg) => !msg.viewed && !msg.sent); 
-			if(!notViewedMessages) return;
-			
-			sendMessage(user, ""); // Mensaje vacío para confirmar que el mensaje fue visto
+	/**
+	 * Envia un mensaje vacío para confirmar que el mensaje fue visto.
+	 * @param {string} user Nombre de usuario del receptor.
+	 * @returns 
+	 */
+	const sendViewedConfirmation = (user) => {
+		if(!messages[user]) return;	// No hay mensajes con el usuario
+		
+		// Verificar si hay mensajes no vistos
+		const notViewedMessages = messages[user].some((msg) => !msg.viewed && !msg.sent); 
+		if(!notViewedMessages) return;
+		
+		sendMessage(user, ""); // Mensaje vacío para confirmar que el mensaje fue visto
 
-			// marcar los mensajes que este cliente recibió como vistos
-			setMessages((prev) => {
-				const newMessages = {...prev};
-				newMessages[user] = newMessages[user].map((msg) => (msg.sent ? msg : {...msg, viewed: true}));
-				return newMessages;
-			});
+		// marcar los mensajes que este cliente recibió como vistos
+		setMessages((prev) => {
+			const newMessages = {...prev};
+			newMessages[user] = newMessages[user].map((msg) => (msg.sent ? msg : {...msg, viewed: true}));
+			return newMessages;
+		});
+	}
 
-		}
+	/**
+	 * Marca (localmente) todos los mensajes de una sala como vistos.
+	 * @param {string} room Nombre de la sala
+	 * @returns 
+	 */
+	const markAllRoomMessagesAsViewed = (room) => {
+		if(!rooms[room]) return; // No hay mensajes en la sala
 
-		const markAllRoomMessagesAsViewed = (room) => {
-			if(!rooms[room]) return; // No hay mensajes en la sala
+		setRooms((prev) => {
+			const newRooms = {...prev};
+			newRooms[room].messages = newRooms[room].messages.map((msg) => ({...msg, viewed: true}));
+			return newRooms;
+		});
+	}
 
-			setRooms((prev) => {
-				const newRooms = {...prev};
-				newRooms[room].messages = newRooms[room].messages.map((msg) => ({...msg, viewed: true}));
-				return newRooms;
-			});
-		}
+	/**
+	 * Crea un nuevo usuario en el servidor XMPP.
+	 * @param {string} user Nombre de usuario
+	 * @param {string} password Contraseña
+	 * @returns Promise. Resolve({status, message}). Reject({status, message})
+	 */
+	const register = (user, password) =>
+		new Promise((resolve, reject) => {
+			try {
+				const xmppClient = client({
+					service: `ws://${consts.serverDomain}:${consts.serverPort}/ws`,
+					resource: consts.connectionResource,
+				});
 
-		const register = (user, password) =>
-			new Promise((resolve, reject) => {
-				try {
-					const xmppClient = client({
-						service: `ws://${consts.serverDomain}:${consts.serverPort}/ws`,
-						resource: consts.connectionResource,
-					});
+				xmppClient.on("error", (err) => {
+					if (err.code === "ECONERROR") {
+						xmppClient.stop();
+						xmppClient.removeAllListeners();
+						reject({ status: false, message: "Error en el cliente XMPP" });
+					}
+				});
 
-					xmppClient.on("error", (err) => {
-						if (err.code === "ECONERROR") {
-							xmppClient.stop();
-							xmppClient.removeAllListeners();
-							reject({ status: false, message: "Error en el cliente XMPP" });
-						}
-					});
+				xmppClient.on("open", () => {
+					const iq = xml(
+						"iq",
+						{ type: "set", to: "alumchat.lol", id: "register" },
+						xml(
+							"query",
+							{ xmlns: "jabber:iq:register" },
+							xml("username", {}, user),
+							xml("password", {}, password)
+						)
+					);
+					xmppClient.send(iq);
+				});
 
-					xmppClient.on("open", () => {
-						const iq = xml(
-							"iq",
-							{ type: "set", to: "alumchat.lol", id: "register" },
-							xml(
-								"query",
-								{ xmlns: "jabber:iq:register" },
-								xml("username", {}, user),
-								xml("password", {}, password)
-							)
-						);
-						xmppClient.send(iq);
-					});
+				xmppClient.on("stanza", async (stanza) => {
+					if (stanza.is("iq") && stanza.getAttr("id") === "register") {
+						await xmppClient.stop();
+						xmppClient.removeAllListeners();
 
-					xmppClient.on("stanza", async (stanza) => {
-						if (stanza.is("iq") && stanza.getAttr("id") === "register") {
-							await xmppClient.stop();
-							xmppClient.removeAllListeners();
+						if (stanza.getAttr("type") === "result") {
 
-							if (stanza.getAttr("type") === "result") {
+							// Registro exitoso
+							resolve({ status: true, message: "Registro exitoso." });
 
-								// Registro exitoso
-								resolve({ status: true, message: "Registro exitoso." });
+						} else if (stanza.getAttr("type") === "error") {
 
-							} else if (stanza.getAttr("type") === "error") {
-
-								// Error manejado del servidor
-								const error = stanza.getChild("error");
-								if (error?.getChild("conflict")) {
-									reject({ status: false, message: "El nombre de usuario no está disponible." });
-								}
-								reject({
-									status: false,
-									message: "Ocurrió un error en tu registro. Intenta nuevamente.",
-								});
+							// Error manejado del servidor
+							const error = stanza.getChild("error");
+							if (error?.getChild("conflict")) {
+								reject({ status: false, message: "El nombre de usuario no está disponible." });
 							}
+							reject({
+								status: false,
+								message: "Ocurrió un error en tu registro. Intenta nuevamente.",
+							});
 						}
-					});
+					}
+				});
 
-					xmppClient.start().catch((err) => {
-						// Se ignora el error invalid-mechanism (ya que es propio de la libreria)
-						if (!err.toString().includes("invalid-mechanism")) {
-							reject({ status: false, message: "Ocurrió un error en la conexión." });
-						}
-					});
-				} catch (error) {
-					reject({ status: false, message: "Ocurrió un error en el registro." });
-				}
-			});		
+				xmppClient.start().catch((err) => {
+					// Se ignora el error invalid-mechanism (ya que es propio de la libreria)
+					if (!err.toString().includes("invalid-mechanism")) {
+						reject({ status: false, message: "Ocurrió un error en la conexión." });
+					}
+				});
+			} catch (error) {
+				reject({ status: false, message: "Ocurrió un error en el registro." });
+			}
+	});		
 
 	return {
 		status,

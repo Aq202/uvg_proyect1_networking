@@ -6,6 +6,14 @@ import consts from '../utils/consts';
 
 const XMPPContext = createContext();
 
+/**
+ * XMPPProvider es un componente que proporciona el contexto XMPP a toda la aplicación.
+ * Mantiene el estado de la conexión XMPP, así como otros estados relacionados como salas,
+ * mensajes, estados de usuarios, etc.
+ * 
+ * @param {Object} props - Las propiedades que se pasan al proveedor.
+ * @param {ReactNode} props.children - Los componentes hijos que se envolverán en el proveedor.
+ */
 export const XMPPProvider = ({ children }) => {
 
     const [userStatus, setUserStatus] = useState({});

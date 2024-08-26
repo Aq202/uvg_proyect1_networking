@@ -4,8 +4,21 @@ import UserPicture from "../UserPicture/UserPicture";
 import dayjs from 'dayjs';
 
 /**
- * 
- * @param onClick Function. Function to call when the chat item is clicked. Gives as parameter the user of the chat. 
+ * Componente de elemento de chat que representa un chat individual en la lista de chats.
+ *
+ * Este componente muestra información como el nombre del usuario, un alias opcional, el último mensaje enviado,
+ * la fecha de ese mensaje, y el número de mensajes no vistos.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {string} props.user - El nombre de usuario del chat.
+ * @param {string} [props.alias] - Alias opcional del usuario.
+ * @param {string} [props.message] - El último mensaje enviado en el chat.
+ * @param {string} [props.date] - La fecha del último mensaje enviado.
+ * @param {boolean} [props.active] - Indica si el usuario está activo.
+ * @param {number} [props.notViewed] - El número de mensajes no vistos en el chat.
+ * @param {boolean} [props.selected] - Indica si el elemento de chat está seleccionado.
+ * @param {boolean} [props.showStatus] - Indica si se debe mostrar el estado del usuario.
+ * @param {Function} [props.onClick] - Función a ejecutar cuando se hace clic en el elemento de chat.
  */
 function ChatItem({
 	user = "",

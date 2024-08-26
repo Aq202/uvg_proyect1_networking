@@ -29,6 +29,9 @@ function useSession() {
 		});
 	};
 
+	/**
+	 * Cierra la sesión del usuario y desconecta del servidor XMPP.
+	 */
 	const logout = () => {
 		window.localStorage.removeItem("session");
 		setSession(null);

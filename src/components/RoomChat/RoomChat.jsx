@@ -9,7 +9,16 @@ import useSession from "../../hooks/useSession";
 import ContactsButton from "../ContactsButton/ContactsButton";
 import ContactItem from "../ContactItem/ContactItem";
 
-
+/**
+ * Componente de chat de sala que maneja la interacción del usuario en una sala de chat específica.
+ *
+ * Este componente permite a los usuarios enviar mensajes de texto y archivos a la sala, ver los mensajes,
+ * y ver los miembros actuales de la sala. También se asegura de que la vista del chat se desplace automáticamente
+ * hacia el final cuando se reciben nuevos mensajes.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {string} props.room - El nombre o identificador de la sala de chat.
+ */
 function RoomChat({ room }) {
 	const {
 		rooms,

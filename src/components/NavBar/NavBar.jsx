@@ -6,6 +6,25 @@ import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
 import { IoExitSharp as ExitIcon } from "react-icons/io5";
 import { MdAccountCircle as ProfileIcon } from "react-icons/md";
 
+/**
+ * Componente de barra de navegación para una aplicación de chat.
+ *
+ * Proporciona accesos directos a diferentes secciones de la aplicación:
+ * - Chats activos
+ * - Grupos
+ * - Contactos
+ * - Perfil
+ * - Salir
+ *
+ * Cada opción se representa como un botón que ejecuta una función de callback cuando es clickeado o activado con el teclado.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {function} props.onChatOptionClick - Función callback al hacer clic en la opción de chats activos.
+ * @param {function} props.onGroupChatOptionClick - Función callback al hacer clic en la opción de grupos.
+ * @param {function} props.onContactsOptionClick - Función callback al hacer clic en la opción de contactos.
+ * @param {function} props.onExitOptionClick - Función callback al hacer clic en la opción de salir.
+ * @param {function} props.onProfileOptionClick - Función callback al hacer clic en la opción de perfil.
+ */
 function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,

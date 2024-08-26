@@ -6,6 +6,12 @@ import ChatItem from '../ChatItem/ChatItem';
 import styles from './ChatsList.module.css';
 import {scrollbarGray} from '../../styles/scrollbar.module.css';
 
+/**
+ * Componente que muestra una lista de chats, permitiendo seleccionar un chat y agregar nuevos chats.
+ * 
+ * @param {Object} props - Las propiedades del componente.
+ * @param {Function} [props.onSelectedUserChange] - Función que se llama cuando el usuario seleccionado cambia, proporcionando el usuario seleccionado como argumento.
+ */
 function ChatsList({onSelectedUserChange=null}) {
 
   const {messages, roster, userStates, createEmptyChat} = useXMPP();

@@ -7,6 +7,12 @@ import styles from "./ChatRoomsList.module.css";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import useSession from "../../hooks/useSession";
 
+/**
+ * Componente que muestra una lista de salas de chat y permite unirse a nuevas salas y seleccionar salas existentes.
+ * 
+ * @param {Object} props - Las propiedades del componente.
+ * @param {Function} [props.onSelectedRoomChange] - Función que se llama cuando la sala seleccionada cambia, proporcionando la sala seleccionada como argumento.
+ */
 function ChatRoomsList({ onSelectedRoomChange = null }) {
 	const { session } = useSession();
 	const { rooms, joinRoom } = useXMPP();

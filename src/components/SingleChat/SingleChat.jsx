@@ -7,6 +7,16 @@ import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import { useEffect, useRef, useState } from "react";
 import AddContactButton from "../AddContactButton/AddContactButton";
 
+/**
+ * Componente de chat individual que maneja la interacción del usuario con otro usuario específico.
+ * 
+ * Este componente permite enviar mensajes, manejar la visualización de mensajes, enviar archivos, y 
+ * agregar contactos. También se asegura de que el chat se desplace hacia abajo automáticamente 
+ * cuando se recibe un nuevo mensaje.
+ *
+ * @param {Object} props - Las propiedades del componente.
+ * @param {string} props.user - El identificador del usuario con el que se está chateando.
+ */
 function SingleChat({ user }) {
 	const {
 		messages,
@@ -86,7 +96,7 @@ function SingleChat({ user }) {
       }
     }
 	}, [messages[user]]);
-	
+
 	return (
 		<div
 			className={styles.chat}
