@@ -472,6 +472,14 @@ const useXMPP = () => {
 	 * @returns {boolean} `true` para mantener el manejador activo.
 	 */
 	const onRoomMessage = (msg) => {
+		
+		const stanzaIdElement = msg.getElementsByTagNameNS('urn:xmpp:sid:0', 'stanza-id')[0];
+		let stanzaId = null;
+    
+    if (stanzaIdElement) {
+        stanzaId = stanzaIdElement.getAttribute('id');
+    }
+
 		const from = msg.getAttribute("from");
 		const roomJid = Strophe.getBareJidFromJid(from);
 		const room = roomJid.split("@")[0];
@@ -488,7 +496,7 @@ const useXMPP = () => {
 			// Guardar el mensaje en el estado
 			setRooms((prev) => {
 				const newRooms = { ...prev };
-				const message = { nickname, message: messageText, date: new Date(), viewed: false };
+				const message = { nickname, message: messageText, date: new Date(), viewed: false, stanzaId };
 				if (!newRooms[room]) {
 					// Si la sala no existe, crearla
 					newRooms[room] = {
@@ -496,8 +504,13 @@ const useXMPP = () => {
 						messages: [message],
 					};
 				} else {
-					// Si la sala existe, agregar el mensaje
-					newRooms[room].messages.push(message);
+					// Si la sala existe
+					// Verificar si el mensaje ya existe
+					const exists = newRooms[room].messages.some((msg) => msg.stanzaId === stanzaId);
+					if(!exists){
+						newRooms[room].messages.push(message);//agregar el mensaje
+					}				
+				
 				}
 
 				return newRooms;
@@ -684,6 +697,8 @@ const useXMPP = () => {
 		sendViewedConfirmation,
 		markAllRoomMessagesAsViewed,
 		register,
+		setMessages,
+		setRooms,
 	};
 };
 

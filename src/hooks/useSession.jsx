@@ -4,7 +4,7 @@ import useXMPP from "./useXMPP";
 
 function useSession() {
 	const { session, setSession } = useContext(SessionContext);
-	const { connection, status, connect, disconnect } = useXMPP();
+	const { connection, status, connect, disconnect, messages, rooms, setMessages, setRooms, joinRoom } = useXMPP();
 
 	/**
 	 *
@@ -15,11 +15,37 @@ function useSession() {
 	 */
 	const login = async ({ user, password, callback }) => {
 		const session = { user, password };
-		connect(user, password, (resStatus) => {
 
+		// Cargar mensajes desde localStorage
+		const key = `messages-${user}`;
+		const messages = window.localStorage.getItem(key);
+		if(messages){
+			setMessages(JSON.parse(messages));
+		}
+
+		// Cargar rooms desde localStorage
+		const keyRooms = `rooms-${user}`;
+		const rooms = window.localStorage.getItem(keyRooms);
+		if(rooms){
+			setRooms(JSON.parse(rooms));
+		}
+
+		connect(user, password, (resStatus) => {
+			console.log(resStatus, status.CONNECTED, status.AUTHFAIL);
 			if (resStatus === status.CONNECTED) {
 				window.localStorage.setItem("session", JSON.stringify(session));
 				setSession(session);
+
+				// Si habian rooms en memoria, unirse automaticamente
+				if(rooms){
+					Object.keys(JSON.parse(rooms)).forEach((room) => {
+						joinRoom(room, user);
+					});
+				}
+			}
+			else if(resStatus === status.AUTHFAIL){
+				setMessages({});
+				setRooms({});
 			}
 
       // Enviar status en callback
@@ -61,6 +87,26 @@ function useSession() {
 		}  });
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [connection]);
+
+	useEffect(() => {
+		
+		if(!session || !messages) return;
+
+		// Guardar en localsotrage los mensajes
+		const key = `messages-${session.user}`;
+		window.localStorage.setItem(key, JSON.stringify(messages));
+
+	}, [messages, session]);
+
+	useEffect(() => {
+		
+		if(!session || !rooms) return;
+
+		// Guardar en localsotrage los rooms
+		const key = `rooms-${session.user}`;
+		window.localStorage.setItem(key, JSON.stringify(rooms));
+
+	}, [rooms, session]);
 
 	return {
 		session,
